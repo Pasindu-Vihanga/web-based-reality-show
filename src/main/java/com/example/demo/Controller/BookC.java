@@ -1,7 +1,7 @@
 package com.example.demo.Controller;
 
-import com.example.BookStrore.Entity.Book;
-import com.example.BookStrore.Service.BookService;
+import com.example.demo.Entity.Book;
+import com.example.demo.Service.BookService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

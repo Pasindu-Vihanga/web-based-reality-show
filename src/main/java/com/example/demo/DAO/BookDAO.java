@@ -1,6 +1,6 @@
 package com.example.demo.DAO;
 
-import com.example.BookStrore.Entity.Book;
+import com.example.demo.Entity.Book;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;

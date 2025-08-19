@@ -1,7 +1,7 @@
 package com.example.demo.Service;
 
-import com.example.BookStrore.DAO.BookDAO;
-import com.example.BookStrore.Entity.Book;
+import com.example.demo.DAO.BookDAO;
+import com.example.demo.Entity.Book;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

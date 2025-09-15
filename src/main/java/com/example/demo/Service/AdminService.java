@@ -6,39 +6,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminService {
 
-    private final AdminDAO adminDAO;
-
-    // Using constructor injection is a best practice
     @Autowired
-    public AdminService(AdminDAO adminDAO) {
-        this.adminDAO = adminDAO;
-    }
+    private AdminDAO adminDAO;
 
-    public void createAdmin(Admin admin) {
-        // You could add business logic here, e.g., validation, before saving
-        adminDAO.saveAdmin(admin);
-    }
-
+    // ✅ Get all admins
     public List<Admin> getAllAdmins() {
-        return adminDAO.getAllAdmins();
+        return adminDAO.findAll();
     }
 
-    public Admin getAdminById(String adminID) {
-        // You could add logic for handling cases where the admin is not found
-        return adminDAO.getAdminByID(adminID);
+    // ✅ Get admin by ID
+    public Optional<Admin> getAdminById(String id) {
+        return adminDAO.findById(id);
     }
 
-    public void updateAdmin(String adminID, Admin admin) {
-        // Ensure the ID from the path is set on the object to be updated
-        admin.setAdminID(adminID);
-        adminDAO.updateAdmin(admin);
+    // ✅ Search admins by name
+    public List<Admin> searchAdmins(String name) {
+        return adminDAO.findByName(name);
     }
 
-    public void deleteAdmin(String adminID) {
-        adminDAO.deleteAdmin(adminID);
+    // ✅ Create new admin
+    public String createAdmin(Admin admin) {
+        int result = adminDAO.save(admin);
+        return result > 0 ? "Admin created successfully" : "Failed to create admin";
+    }
+
+    // ✅ Update admin
+    public String updateAdmin(String id, Admin admin) {
+        admin.setAdminID(id);
+        int result = adminDAO.update(admin);
+        return result > 0 ? "Admin updated successfully" : "Failed to update admin";
+    }
+
+    // ✅ Delete admin
+    public String deleteAdmin(String id) {
+        int result = adminDAO.delete(id);
+        return result > 0 ? "Admin deleted successfully" : "Failed to delete admin";
     }
 }

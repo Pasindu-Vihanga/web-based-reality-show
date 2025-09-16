@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DAO.ShowDAO;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.example.demo.Entity.Show;
@@ -8,18 +9,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-
 import java.util.List;
 
     @Controller
-    @RequestMapping("/")
     public class ShowC {
 
         private final ShowService showService;
+        private final ShowDAO showDAO;
 
-        public ShowC(ShowService showService) {
+        public ShowC(ShowService showService, ShowDAO showDAO) {
             this.showService = showService;
+            this.showDAO = showDAO;
+        }
+
+        // 🏠 Home page
+        @GetMapping("/")
+        public String episodes() {
+            return "episodes";
         }
 
         // 📋 View all episodes
@@ -27,7 +33,7 @@ import java.util.List;
         public String viewAllEpisodes(Model model) {
             List<Show> episodes = showService.getAllEpisodes();
             model.addAttribute("episodeList", episodes);
-            return "episodes"; // your JSP/HTML page name
+            return "episodes";
         }
 
         // 🔍 Search episodes by title
@@ -46,11 +52,11 @@ import java.util.List;
         }
 
         // 💾 Save new episode
-        @PostMapping("/episodes/save")
+        @PostMapping("/save")
         public String saveEpisode(@ModelAttribute Show episode, RedirectAttributes redirectAttributes) {
             showService.saveEpisode(episode);
             redirectAttributes.addFlashAttribute("message", "Episode saved successfully!");
-            return "redirect:/episodes/view";
+            return "redirect:/episodes";
         }
 
         // 🗑️ Delete episode

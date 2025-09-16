@@ -1,6 +1,5 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Entity.Book;
 import com.example.demo.Service.BookService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

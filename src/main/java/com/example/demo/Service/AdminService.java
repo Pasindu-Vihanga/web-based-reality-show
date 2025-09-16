@@ -47,4 +47,16 @@ public class AdminService {
         int result = adminDAO.delete(id);
         return result > 0 ? "Admin deleted successfully" : "Failed to delete admin";
     }
+
+    // ✅ Authenticate admin using ID and password
+    public boolean authenticateAdmin(String id, String password) {
+        Optional<Admin> adminOptional = adminDAO.findById(id);
+
+        if (adminOptional.isPresent()) {
+            Admin admin = adminOptional.get();
+            return password != null && password.equals(admin.getAdminPassword());
+        }
+
+        return false;
+    }
 }

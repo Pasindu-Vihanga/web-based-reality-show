@@ -31,7 +31,7 @@ import java.util.List;
         // 📋 View all episodes
         @GetMapping("/episodes")
         public String viewAllEpisodes(Model model) {
-            List<Show> episodes = showService.getAllEpisodes();
+            List<Show> episodes = showService.getAllShows();
             model.addAttribute("episodeList", episodes);
             return "episodes";
         }
@@ -39,7 +39,7 @@ import java.util.List;
         // 🔍 Search episodes by title
         @GetMapping("/search")
         public String searchEpisodes(@RequestParam String keyword, Model model) {
-            List<Show> found = showService.searchByTitle(keyword);
+            List<Show> found = showService.findShowsByTitle(keyword);
             model.addAttribute("episodeList", found);
             model.addAttribute("searchKeyword", keyword);
             return "viewEpisodes";
@@ -54,7 +54,7 @@ import java.util.List;
         // 💾 Save new episode
         @PostMapping("/save")
         public String saveEpisode(@ModelAttribute Show episode, RedirectAttributes redirectAttributes) {
-            showService.saveEpisode(episode);
+            showService.saveShow(episode);
             redirectAttributes.addFlashAttribute("message", "Episode saved successfully!");
             return "redirect:/episodes";
         }
@@ -62,7 +62,7 @@ import java.util.List;
         // 🗑️ Delete episode
         @GetMapping("/delete")
         public String deleteEpisode(@RequestParam String episodeId, RedirectAttributes redirectAttributes) {
-            showService.deleteEpisode(episodeId);
+            showService.deleteShow(episodeId);
             redirectAttributes.addFlashAttribute("message", "Episode deleted successfully!");
             return "redirect:/episodes/view";
         }

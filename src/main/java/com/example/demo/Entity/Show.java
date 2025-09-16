@@ -20,24 +20,12 @@ import java.sql.Time;
 public class Show {
 
     @Id
-    @Column(name = "episodeId", nullable = false, length = 20)
     private String episodeId;
 
-    @Column(name = "showTitle", nullable = false, length = 50)
     private String showTitle;
-
-    @Column(name = "showDescription", nullable = false, length = 255)
     private String showDescription;
-
-    @Column(name = "showImage")
-    private String showImage; // ✅ Consider using byte[] if storing binary image data
-
-    @Column(name = "showType", nullable = false, length = 20)
+    private String showImage;
     private String showType;
-
-    @Column(name = "showDate")
     private Date showDate;
-
-    @Column(name = "showTime")
     private Time showTime;
 }

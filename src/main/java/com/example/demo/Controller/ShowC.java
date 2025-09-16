@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
     @Controller
-    @RequestMapping("/episodes")
+    @RequestMapping("/")
     public class ShowC {
 
         private final ShowService showService;
@@ -46,7 +46,7 @@ import java.util.List;
         }
 
         // 💾 Save new episode
-        @PostMapping("/save")
+        @PostMapping("/episodes/save")
         public String saveEpisode(@ModelAttribute Show episode, RedirectAttributes redirectAttributes) {
             showService.saveEpisode(episode);
             redirectAttributes.addFlashAttribute("message", "Episode saved successfully!");

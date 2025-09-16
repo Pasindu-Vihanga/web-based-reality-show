@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Admin</title>
+</head>
+<body>
+<h2>Edit Admin</h2>
+<form action="/admin/update" method="post">
+    <input type="hidden" name="adminID" th:value="${admin.adminID}">
+    <label>Name: <input type="text" name="adminName" th:value="${admin.adminName}" required></label><br>
+    <label>Password: <input type="password" name="adminPassword" th:value="${admin.adminPassword}" required></label><br>
+    <label>Role Name: <input type="text" name="roleName" th:value="${admin.roleName}"></label><br>
+    <label>Role ID: <input type="text" name="roleID" th:value="${admin.roleID}"></label><br>
+    <label>Mobile: <input type="text" name="mobileNumber" th:value="${admin.mobileNumber}"></label><br>
+    <label>Email: <input type="email" name="email" th:value="${admin.email}"></label><br>
+    <label>Address: <input type="text" name="address" th:value="${admin.address}"></label><br>
+    <button type="submit">Update Admin</button>
+</form>
+<a href="/admin/view">Back to Admin List</a>
+</body>
+</html>

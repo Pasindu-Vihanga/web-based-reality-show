@@ -1,10 +1,10 @@
 package com.example.demo.Controller;
 
-import com.example.demo.DAO.AdminDAO;
 import com.example.demo.Entity.Admin;
+import com.example.demo.Service.AdminService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,69 +12,88 @@ import java.util.Optional;
 @Controller
 public class AdminC {
 
+    private final AdminService adminService;
 
-    private final AdminDAO adminDAO;
-
-    public AdminC(AdminDAO adminDAO) {
-        this.adminDAO = adminDAO;
+    public AdminC(AdminService adminService) {
+        this.adminService = adminService;
     }
 
+    // 🏠 Home page
     @GetMapping("/")
     public String home() {
         return "home";
     }
 
-    // ✅ Home page mapping to Thymeleaf template
-    @GetMapping("/admin")
-    public String home(Model model) {
-        List<Admin> admins = adminDAO.findAll();
-        model.addAttribute("admins", admins); // Pass admins to Thymeleaf
-        return "admin"; // admin.html in templates folder
+    // 📋 View all admins
+    @GetMapping("/viewA")
+    public String getAllAdmins(Model model) {
+        List<Admin> admins = adminService.getAllAdmins();
+        model.addAttribute("adminList", admins);
+        return "viewA";
+    }
+    // 🔍 Search admin by name
+    @GetMapping("/admin/search")
+    public String searchAdmin(@RequestParam String adminName, Model model) {
+        List<Admin> found = adminService.searchAdmins(adminName);
+        if (!found.isEmpty()) {
+            model.addAttribute("adminList", found);
+        } else {
+            model.addAttribute("adminList", List.of());
+            model.addAttribute("message", "No admin found with name: " + adminName);
+        }
+        return "viewA";
     }
 
-    // ✅ Get all admins (REST API)
-    @GetMapping
-    @ResponseBody
-    public List<Admin> getAllAdmins() {
-        return adminDAO.findAll();
+    // 📝 Admin registration form
+    @GetMapping("/registerA")
+    public String adminRegister() {
+        return "registerA";
     }
 
-    // ✅ Get admin by ID
-    @GetMapping("/{id}")
-    @ResponseBody
-    public Optional<Admin> getAdminById(@PathVariable String id) {
-        return adminDAO.findById(id);
+    // 💾 Save new admin
+    @PostMapping("/admin/save")
+    public String saveAdmin(@RequestParam String adminID,
+                            @RequestParam String adminName,
+                            @RequestParam String adminPassword,
+                            @RequestParam String roleName,
+                            @RequestParam String roleID,
+                            @RequestParam String mobileNumber,
+                            @RequestParam String email,
+                            @RequestParam String address) {
+        Admin admin = new Admin(adminID, adminName, adminPassword, roleName, roleID, mobileNumber, email, address);
+        adminService.createAdmin(admin);
+        return "redirect:/viewA";
+    }
+    // ✏️ Update admin form
+    @GetMapping("/admin/edit")
+    public String editAdminForm(@RequestParam String adminID, Model model) {
+        Optional<Admin> admin = adminService.getAdminById(adminID);
+        if (admin.isPresent()) {
+            model.addAttribute("admin", admin.get());
+            return "admin_edit";
+        } else {
+            return "redirect:/admin/view";
+        }
     }
 
-    // ✅ Search admin by name
-    @GetMapping("/search")
-    @ResponseBody
-    public List<Admin> searchAdmins(@RequestParam String name) {
-        return adminDAO.findByName(name);
+    // ✅ Submit admin update
+    @PostMapping("/admin/update")
+    public String updateAdmin(@RequestParam String adminID,
+                              @RequestParam String adminName,
+                              @RequestParam String adminPassword,
+                              @RequestParam String roleName,
+                              @RequestParam String roleID,
+                              @RequestParam String mobileNumber,
+                              @RequestParam String email,
+                              @RequestParam String address) {
+        Admin admin = new Admin(adminID, adminName, adminPassword, roleName, roleID, mobileNumber, email, address);
+        adminService.updateAdmin(adminID, admin);
+        return "redirect:/admin/view";
     }
-
-    // ✅ Create a new admin
-    @PostMapping
-    @ResponseBody
-    public String createAdmin(@RequestBody Admin admin) {
-        int result = adminDAO.save(admin);
-        return result > 0 ? "Admin created successfully" : "Failed to create admin";
-    }
-
-    // ✅ Update existing admin
-    @PutMapping("/{id}")
-    @ResponseBody
-    public String updateAdmin(@PathVariable String id, @RequestBody Admin admin) {
-        admin.setAdminID(id);
-        int result = adminDAO.update(admin);
-        return result > 0 ? "Admin updated successfully" : "Failed to update admin";
-    }
-
-    // ✅ Delete admin
-    @DeleteMapping("/{id}")
-    @ResponseBody
-    public String deleteAdmin(@PathVariable String id) {
-        int result = adminDAO.delete(id);
-        return result > 0 ? "Admin deleted successfully" : "Failed to delete admin";
+    // 🗑️ Delete admin
+    @GetMapping("/admin/delete")
+    public String deleteAdmin(@RequestParam String adminID) {
+        adminService.deleteAdmin(adminID);
+        return "redirect:/viewA";
     }
 }

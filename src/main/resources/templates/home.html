@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarFactor - Reality Show Voting</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --accent: #ff4d94;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #ff4d94, #6a11cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-section {
+            background: url('https://images.unsplash.com/photo-1535016120720-40c646be5580?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
+            padding: 7rem 0;
+            position: relative;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(106, 17, 203, 0.8), rgba(37, 117, 252, 0.7));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .countdown-box {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .countdown-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #ff4d94, #6a11cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contestant-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .contestant-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .contestant-img {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .vote-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .vote-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+        }
+
+        .vote-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            background: linear-gradient(to right, #ff4d94, #6a11cb);
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .footer {
+            background: var(--dark);
+            padding: 3rem 0 1rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(26, 26, 46, 0.9); backdrop-filter: blur(10px);">
+    <div class="container">
+        <a class="navbar-brand" href="#">StarFactor</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contestants</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Vote</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Results</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">About</a>
+                </li>
+            </ul>
+            <div class="ms-lg-3 mt-3 mt-lg-0">
+                <button class="btn btn-outline-light me-2">Login</button>
+                <button class="btn" style="background: linear-gradient(to right, var(--primary), var(--secondary)); color: white;">Register</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-3 fw-bold mb-4">Vote For Your Favorite Star</h1>
+                <p class="lead mb-4">The ultimate reality show competition is here! Watch performances, support your favorites, and vote to keep them in the competition.</p>
+                <button class="btn btn-lg vote-btn">Vote Now <i class="ms-2 fas fa-arrow-right"></i></button>
+            </div>
+            <div class="col-lg-5 offset-lg-1 mt-5 mt-lg-0">
+                <div class="countdown-box">
+                    <h3 class="text-center mb-4">Voting Closes In</h3>
+                    <div class="d-flex justify-content-around text-center">
+                        <div>
+                            <div class="countdown-number" id="days">02</div>
+                            <div>Days</div>
+                        </div>
+                        <div>
+                            <div class="countdown-number" id="hours">12</div>
+                            <div>Hours</div>
+                        </div>
+                        <div>
+                            <div class="countdown-number" id="minutes">45</div>
+                            <div>Minutes</div>
+                        </div>
+                        <div>
+                            <div class="countdown-number" id="seconds">30</div>
+                            <div>Seconds</div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <p class="mb-2">Total Votes Cast: <strong>124,893</strong></p>
+                        <div class="vote-progress">
+                            <div class="progress-bar" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contestants Section -->
+<section class="py-5">
+    <div class="container py-5">
+        <h2 class="text-center section-title mx-auto" style="max-width: 300px;">Meet The Contestants</h2>
+        <p class="text-center lead mb-5">These talented performers need your vote to continue their journey</p>
+
+        <div class="row g-4">
+            <!-- Contestant 1 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="contestant-card">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="contestant-img" alt="Contestant">
+                    <div class="p-3">
+                        <h4>Alex Johnson</h4>
+                        <p class="text-muted">Singer</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>Votes: 28,456</div>
+                            <button class="btn btn-sm vote-btn">Vote</button>
+                        </div>
+                        <div class="vote-progress">
+                            <div class="progress-bar" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contestant 2 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="contestant-card">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="contestant-img" alt="Contestant">
+                    <div class="p-3">
+                        <h4>Sophia Martinez</h4>
+                        <p class="text-muted">Dancer</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>Votes: 32,891</div>
+                            <button class="btn btn-sm vote-btn">Vote</button>
+                        </div>
+                        <div class="vote-progress">
+                            <div class="progress-bar" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contestant 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="contestant-card">
+                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="contestant-img" alt="Contestant">
+                    <div class="p-3">
+                        <h4>Michael Chen</h4>
+                        <p class="text-muted">Musician</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>Votes: 25,342</div>
+                            <button class="btn btn-sm vote-btn">Vote</button>
+                        </div>
+                        <div class="vote-progress">
+                            <div class="progress-bar" style="width: 58%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contestant 4 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="contestant-card">
+                    <img src="https://images.unsplash.com/photo-1516726817505-f5ed825624d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="contestant-img" alt="Contestant">
+                    <div class="p-3">
+                        <h4>Jessica Williams</h4>
+                        <p class="text-muted">Actor</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>Votes: 38,204</div>
+                            <button class="btn btn-sm vote-btn">Vote</button>
+                        </div>
+                        <div class="vote-progress">
+                            <div class="progress-bar" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <button class="btn btn-outline-light">View All Contestants</button>
+        </div>
+    </div>
+</section>
+
+<!-- How to Vote Section -->
+<section class="py-5 bg-dark">
+    <div class="container py-5">
+        <h2 class="text-center section-title mx-auto" style="max-width: 250px;">How To Vote</h2>
+        <p class="text-center lead mb-5">Support your favorite contestant in just a few simple steps</p>
+
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="p-4 rounded" style="background: rgba(255, 255, 255, 0.1);">
+                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-user-check fa-2x"></i>
+                    </div>
+                    <h4>Create Account</h4>
+                    <p>Register for free with your email or social media account</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="p-4 rounded" style="background: rgba(255, 255, 255, 0.1);">
+                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                    <h4>Select Contestant</h4>
+                    <p>Choose your favorite performer from the list of contestants</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="p-4 rounded" style="background: rgba(255, 255, 255, 0.1);">
+                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-vote-yea fa-2x"></i>
+                    </div>
+                    <h4>Cast Your Vote</h4>
+                    <p>Submit your vote and share with friends to support your favorite</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted">You can vote once per day from each account</p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <h3 class="mb-4">StarFactor</h3>
+                <p>The ultimate reality show competition platform where your votes decide the next superstar.</p>
+                <div class="d-flex gap-3 mt-4">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-4">
+                <h5 class="mb-4">Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Home</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Contestants</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Vote</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Results</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-4">
+                <h5 class="mb-4">Information</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">About Us</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Rules</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Privacy Policy</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-light">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4 col-md-4 mb-4">
+                <h5 class="mb-4">Newsletter</h5>
+                <p>Subscribe to get updates on contestants and voting results</p>
+                <div class="input-group mb-3">
+                    <input type="email" class="form-control" placeholder="Your Email">
+                    <button class="btn btn-primary">Subscribe</button>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mt-4 mb-4">
+
+        <div class="text-center py-3">
+            <p class="mb-0">© 2023 StarFactor. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Countdown Timer
+    function updateCountdown() {
+        const days = document.getElementById('days');
+        const hours = document.getElementById('hours');
+        const minutes = document.getElementById('minutes');
+        const seconds = document.getElementById('seconds');
+
+        let dayVal = parseInt(days.innerText);
+        let hourVal = parseInt(hours.innerText);
+        let minuteVal = parseInt(minutes.innerText);
+        let secondVal = parseInt(seconds.innerText);
+
+        secondVal--;
+
+        if (secondVal < 0) {
+            secondVal = 59;
+            minuteVal--;
+
+            if (minuteVal < 0) {
+                minuteVal = 59;
+                hourVal--;
+
+                if (hourVal < 0) {
+                    hourVal = 23;
+                    dayVal--;
+
+                    if (dayVal < 0) {
+                        // Countdown finished
+                        dayVal = 0;
+                        hourVal = 0;
+                        minuteVal = 0;
+                        secondVal = 0;
+                    }
+                }
+            }
+        }
+
+        days.innerText = dayVal.toString().padStart(2, '0');
+        hours.innerText = hourVal.toString().padStart(2, '0');
+        minutes.innerText = minuteVal.toString().padStart(2, '0');
+        seconds.innerText = secondVal.toString().padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+
+    // Vote button functionality
+    document.querySelectorAll('.vote-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            alert('You need to login first to vote for this contestant!');
+        });
+    });
+</script>
+</body>
+</html>

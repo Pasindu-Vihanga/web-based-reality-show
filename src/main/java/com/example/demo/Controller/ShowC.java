@@ -1,11 +1,14 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Show;
+import com.example.demo.Entity.Admin;
+import com.example.demo.Entity.User;
 import com.example.demo.Service.ShowService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,33 +24,52 @@ public class ShowC {
 
     /** ========== VIEW ALL EPISODES (Admin) ========== */
     @GetMapping("/episodeView")
-    public String viewAllAdmin(Model model) {
+    public String viewAllAdmin(Model model, HttpSession session) {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA"; // redirect if not logged in
+        }
+
         List<Show> episodes = showService.getAllShows();
         model.addAttribute("episodeList", episodes);
-        return "episodeView"; // Thymeleaf template
+        return "episodeView";
     }
 
     /** ========== VIEW ALL EPISODES (User) ========== */
     @GetMapping("/epiforUser")
-    public String viewAllEpisodesForUser(Model model) {
+    public String viewAllEpisodesForUser(Model model, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU"; // redirect if not logged in
+        }
+
         List<Show> episodes = showService.getAllShows();
         model.addAttribute("episodeList", episodes);
-        return "epiforUser"; // Thymeleaf template
+        return "epiforUser";
     }
 
     /** ========== SEARCH EPISODES (User) ========== */
     @GetMapping("/search")
-    public String searchEpisodes(@RequestParam String keyword, Model model) {
+    public String searchEpisodes(@RequestParam String keyword, Model model, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU";
+        }
+
         List<Show> found = showService.findShowsByTitle(keyword);
         model.addAttribute("episodeList", found);
         model.addAttribute("searchKeyword", keyword);
         return "epiforUser";
     }
 
-    /** ========== ADD NEW EPISODE (Form Submission) ========== */
+    /** ========== ADD NEW EPISODE (Admin Only) ========== */
     @PostMapping("/add")
-    public String addEpisode(@ModelAttribute Show show) {
-        // Generate unique ID if not provided
+    public String addEpisode(@ModelAttribute Show show, HttpSession session) {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         if (show.getEpisodeId() == null || show.getEpisodeId().isBlank()) {
             show.setEpisodeId(UUID.randomUUID().toString());
         }
@@ -58,31 +80,46 @@ public class ShowC {
         return "redirect:/episodeView";
     }
 
-    /** ========== EDIT EPISODE FORM ========== */
+    /** ========== EDIT EPISODE FORM (Admin Only) ========== */
     @GetMapping("/edit/{id}")
-    public String editEpisodeForm(@PathVariable("id") String episodeId, Model model) {
+    public String editEpisodeForm(@PathVariable("id") String episodeId, Model model, HttpSession session) {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         Optional<Show> episode = showService.findShowById(episodeId);
         if (episode.isPresent()) {
             model.addAttribute("show", episode.get());
-            return "editEpisode"; // new Thymeleaf template for editing
+            return "editEpisode";
         } else {
             return "redirect:/episodeView";
         }
     }
 
-    /** ========== UPDATE EPISODE ========== */
+    /** ========== UPDATE EPISODE (Admin Only) ========== */
     @PostMapping("/update")
-    public String updateEpisode(@ModelAttribute Show show) {
+    public String updateEpisode(@ModelAttribute Show show, HttpSession session) {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         if (showService.validateShow(show)) {
             showService.updateShow(show);
         }
         return "redirect:/episodeView";
     }
 
-    /** ========== DELETE EPISODE ========== */
+    /** ========== DELETE EPISODE (Admin Only) ========== */
     @PostMapping("/delete/{id}")
-    public String deleteEpisode(@PathVariable("id") String episodeId) {
+    public String deleteEpisode(@PathVariable("id") String episodeId, HttpSession session) {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         showService.deleteShow(episodeId);
-        return "redirect:/episodeManage/view";
+        return "redirect:/episodeView";
     }
 }

@@ -22,22 +22,22 @@ public class AdminDAO {
     private final RowMapper<Admin> adminRowMapper = new RowMapper<>() {
         @Override
         public Admin mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Admin(
-                    rs.getString("admin_id"),
-                    rs.getString("admin_name"),
-                    rs.getString("admin_password"),
-                    rs.getString("role_name"),
-                    rs.getString("role_id"),
-                    rs.getString("mobile_number"),
-                    rs.getString("email"),
-                    rs.getString("address")
-            );
+            Admin admin = new Admin();
+            admin.setAdminID(rs.getString("adminid"));
+            admin.setAdminName(rs.getString("admin_name"));
+            admin.setAdminPassword(rs.getString("admin_password"));
+            admin.setRoleName(rs.getString("role_name"));
+            admin.setRoleID(rs.getString("roleid"));
+            admin.setMobileNumber(rs.getString("mobile_number"));
+            admin.setEmail(rs.getString("email"));
+            admin.setAddress(rs.getString("address"));
+            return admin;
         }
     };
 
-    // Insert Admin
+    /** ================== INSERT ================== */
     public int save(Admin admin) {
-        String sql = "INSERT INTO admin (admin_id, admin_name, admin_password, role_name, role_id, mobile_number, email, address) " +
+        String sql = "INSERT INTO admin (adminid, admin_name, admin_password, role_name, roleid, mobile_number, email, address) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(sql,
                 admin.getAdminID(),
@@ -47,12 +47,14 @@ public class AdminDAO {
                 admin.getRoleID(),
                 admin.getMobileNumber(),
                 admin.getEmail(),
-                admin.getAddress());
+                admin.getAddress()
+        );
     }
 
-    // Update Admin
+    /** ================== UPDATE ================== */
     public int update(Admin admin) {
-        String sql = "UPDATE admin SET admin_name=?, admin_password=?, role_name=?, role_id=?, mobile_number=?, email=?, address=? WHERE admin_id=?";
+        String sql = "UPDATE admin SET admin_name=?, admin_password=?, role_name=?, roleid=?, mobile_number=?, email=?, address=? " +
+                "WHERE adminid=?";
         return jdbcTemplate.update(sql,
                 admin.getAdminName(),
                 admin.getAdminPassword(),
@@ -61,34 +63,49 @@ public class AdminDAO {
                 admin.getMobileNumber(),
                 admin.getEmail(),
                 admin.getAddress(),
-                admin.getAdminID());
+                admin.getAdminID()
+        );
     }
 
-    // Delete Admin by ID
-    public int delete(String adminID) {
-        String sql = "DELETE FROM admin WHERE admin_id=?";
-        return jdbcTemplate.update(sql, adminID);
+    /** ================== DELETE ================== */
+    public int delete(String adminId) {
+        String sql = "DELETE FROM admin WHERE adminid=?";
+        return jdbcTemplate.update(sql, adminId);
     }
 
-    // Get all Admins
+    /** ================== FIND ALL ================== */
     public List<Admin> findAll() {
         String sql = "SELECT * FROM admin";
         return jdbcTemplate.query(sql, adminRowMapper);
     }
 
-    // Find Admin by ID
-    public Optional<Admin> findById(String adminID) {
-        String sql = "SELECT * FROM admin WHERE admin_id=?";
+    /** ================== FIND BY ID ================== */
+    public Optional<Admin> findById(String adminId) {
+        String sql = "SELECT * FROM admin WHERE adminid=?";
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, adminRowMapper, adminID));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, adminRowMapper, adminId));
         } catch (DataAccessException e) {
             return Optional.empty();
         }
     }
 
-    // Find Admin by Name
-    public List<Admin> findByName(String name) {
-        String sql = "SELECT * FROM admin WHERE admin.admin_name LIKE ?";
-        return jdbcTemplate.query(sql, adminRowMapper, "%" + name + "%");
+    /** ================== FIND BY NAME ================== */
+    public Optional<Admin> findByName(String adminName) {
+        String sql = "SELECT * FROM admin WHERE admin_name=?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, adminRowMapper, adminName));
+        } catch (DataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    /** ================== LOGIN CHECK (AdminName + Password) ================== */
+    public Optional<Admin> login(String adminName, String password) {
+        String sql = "SELECT * FROM admin WHERE admin_name=? AND admin_password=?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, adminRowMapper, adminName, password));
+        } catch (DataAccessException e) {
+            return Optional.empty();
+        }
     }
 }

@@ -28,7 +28,7 @@
 
     <!-- Table -->
     <div class="card shadow mb-5">
-        <div class="card-header d-flex justify-content-between">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">All Sessions</h5>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSessionModal">
                 <i class="fas fa-plus"></i> Add Session
@@ -83,45 +83,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Edit Form (Only shows if editing) -->
-    <div class="card shadow" th:if="${session != null}">
-        <div class="card-header">
-            <h5>Edit Voting Session</h5>
-        </div>
-        <div class="card-body">
-            <form th:action="@{/session/update}" method="post" th:object="${session}">
-                <input type="hidden" th:field="*{sessionId}">
-
-                <label class="form-label">Episode</label>
-                <select th:field="*{show.episodeId}" class="form-select mb-3" required>
-                    <option value="" disabled>Select an episode…</option>
-                    <option th:each="ep : ${episodeList}"
-                            th:value="${ep.episodeId}"
-                            th:text="${ep.showTitle + ' (' + ep.episodeId + ')'}"
-                            th:selected="${ep.episodeId == session.show.episodeId}">
-                    </option>
-                </select>
-
-                <label class="form-label">Start Time</label>
-                <input type="datetime-local" th:field="*{startTime}" class="form-control mb-3" required>
-
-                <label class="form-label">End Time</label>
-                <input type="datetime-local" th:field="*{endTime}" class="form-control mb-3" required>
-
-                <label class="form-label">Max Votes Per User</label>
-                <input type="number" th:field="*{maxVotesPerUser}" class="form-control mb-3" min="1" required>
-
-                <div class="form-check mb-3">
-                    <input type="checkbox" th:field="*{active}" class="form-check-input" id="activeCheck">
-                    <label for="activeCheck" class="form-check-label">Active</label>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Update</button>
-                <a href="/voteSessionA" class="btn btn-secondary">Cancel</a>
-            </form>
-        </div>
-    </div>
 </div>
 
 <!-- Add Session Modal -->
@@ -134,6 +95,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- Episode Dropdown -->
                     <label class="form-label">Episode</label>
                     <select th:field="*{show.episodeId}" class="form-select mb-3" required>
                         <option value="" disabled selected>Select an episode…</option>

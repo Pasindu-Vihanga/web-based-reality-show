@@ -1,8 +1,10 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Entity.Admin;
 import com.example.demo.Entity.Vote;
 import com.example.demo.Service.VoteService;
 import com.example.demo.Service.ShowService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +24,18 @@ public class VoteC {
         this.showService = showService;
     }
 
-    /** ========== VIEW ALL SESSIONS (Admin) ========== */
+    /** ========== VIEW ALL SESSIONS (Admin Only, Session Handling) ========== */
     @GetMapping("/voteSessionA")
-    public String viewAllSessionsAdmin(Model model) {
+    public String viewAllSessionsAdmin(HttpSession session, Model model) {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA"; // Redirect if not logged in as admin
+        }
+
         List<Vote> sessions = voteService.getAllSessions();
         model.addAttribute("sessionList", sessions);
 
-        // for dropdown in Add modal
+        // For dropdown in Add modal
         model.addAttribute("episodeList", showService.getAllShows());
         model.addAttribute("newSession", new Vote());
 
@@ -43,9 +50,14 @@ public class VoteC {
         return "voteSessionU";
     }
 
-    /** ========== ADD NEW SESSION (Form Submission) ========== */
+    /** ========== ADD NEW SESSION (Admin Only) ========== */
     @PostMapping("/session/add")
-    public String addSession(@ModelAttribute Vote session) {
+    public String addSession(@ModelAttribute Vote session, HttpSession sessionHttp) {
+        Admin loggedInAdmin = (Admin) sessionHttp.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         if (session.getSessionId() == null || session.getSessionId().isBlank()) {
             session.setSessionId(UUID.randomUUID().toString());
         }
@@ -56,9 +68,14 @@ public class VoteC {
         return "redirect:/voteSessionA";
     }
 
-    /** ========== EDIT SESSION FORM ========== */
+    /** ========== EDIT SESSION FORM (Admin Only) ========== */
     @GetMapping("/session/edit/{id}")
-    public String editSessionForm(@PathVariable("id") String sessionId, Model model) {
+    public String editSessionForm(@PathVariable("id") String sessionId, Model model, HttpSession sessionHttp) {
+        Admin loggedInAdmin = (Admin) sessionHttp.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         Optional<Vote> session = voteService.findSessionById(sessionId);
         if (session.isPresent()) {
             model.addAttribute("session", session.get());
@@ -69,18 +86,28 @@ public class VoteC {
         }
     }
 
-    /** ========== UPDATE SESSION ========== */
+    /** ========== UPDATE SESSION (Admin Only) ========== */
     @PostMapping("/session/update")
-    public String updateSession(@ModelAttribute Vote session) {
+    public String updateSession(@ModelAttribute Vote session, HttpSession sessionHttp) {
+        Admin loggedInAdmin = (Admin) sessionHttp.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         if (voteService.validateSession(session)) {
             voteService.updateSession(session);
         }
         return "redirect:/voteSessionA";
     }
 
-    /** ========== DELETE SESSION ========== */
+    /** ========== DELETE SESSION (Admin Only) ========== */
     @PostMapping("/session/delete/{id}")
-    public String deleteSession(@PathVariable("id") String sessionId) {
+    public String deleteSession(@PathVariable("id") String sessionId, HttpSession sessionHttp) {
+        Admin loggedInAdmin = (Admin) sessionHttp.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
+        }
+
         voteService.deleteSession(sessionId);
         return "redirect:/voteSessionA";
     }

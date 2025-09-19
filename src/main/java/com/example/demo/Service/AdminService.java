@@ -2,7 +2,6 @@ package com.example.demo.Service;
 
 import com.example.demo.DAO.AdminDAO;
 import com.example.demo.Entity.Admin;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,52 +10,33 @@ import java.util.Optional;
 @Service
 public class AdminService {
 
-    @Autowired
-    private AdminDAO adminDAO;
+    private final AdminDAO adminDAO;
 
-    // ✅ Get all admins
+    public AdminService(AdminDAO adminDAO) {
+        this.adminDAO = adminDAO;
+    }
+
+    public Optional<Admin> login(String adminName, String password) {
+        return adminDAO.login(adminName, password);
+    }
+
     public List<Admin> getAllAdmins() {
         return adminDAO.findAll();
     }
 
-    // ✅ Get admin by ID
-    public Optional<Admin> getAdminById(String id) {
-        return adminDAO.findById(id);
+    public Optional<Admin> findAdminById(String adminId) {
+        return adminDAO.findById(adminId);
     }
 
-    // ✅ Search admins by name
-    public List<Admin> searchAdmins(String name) {
-        return adminDAO.findByName(name);
+    public void saveAdmin(Admin admin) {
+        adminDAO.save(admin);
     }
 
-    // ✅ Create new admin
-    public String createAdmin(Admin admin) {
-        int result = adminDAO.save(admin);
-        return result > 0 ? "Admin created successfully" : "Failed to create admin";
+    public void updateAdmin(Admin admin) {
+        adminDAO.update(admin);
     }
 
-    // ✅ Update admin
-    public String updateAdmin(String id, Admin admin) {
-        admin.setAdminID(id);
-        int result = adminDAO.update(admin);
-        return result > 0 ? "Admin updated successfully" : "Failed to update admin";
-    }
-
-    // ✅ Delete admin
-    public String deleteAdmin(String id) {
-        int result = adminDAO.delete(id);
-        return result > 0 ? "Admin deleted successfully" : "Failed to delete admin";
-    }
-
-    // ✅ Authenticate admin using ID and password
-    public boolean authenticateAdmin(String id, String password) {
-        Optional<Admin> adminOptional = adminDAO.findById(id);
-
-        if (adminOptional.isPresent()) {
-            Admin admin = adminOptional.get();
-            return password != null && password.equals(admin.getAdminPassword());
-        }
-
-        return false;
+    public void deleteAdmin(String adminId) {
+        adminDAO.delete(adminId);
     }
 }

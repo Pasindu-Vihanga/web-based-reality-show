@@ -3,83 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StarFactor - Login</title>
+    <title>StarFactor - Login Portal</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        :root {
+            --starfield-dark: #0a0e17;
+            --starfield-blue: #0c1d36;
+            --neon-blue: #00a8ff;
+            --neon-purple: #9d4edd;
+            --star-glow: #ffffff;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, var(--starfield-dark), var(--starfield-blue));
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            overflow: hidden;
+            position: relative;
         }
-        .login-card {
-            background: rgba(26, 26, 46, 0.9);
-            padding: 2rem;
-            border-radius: 20px;
-            max-width: 400px;
+
+        /* Starfield background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            height: 100%;
+            z-index: -1;
         }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        .login-card {
+            background: rgba(13, 19, 33, 0.85);
+            padding: 2.5rem;
+            border-radius: 15px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 0 35px rgba(157, 78, 221, 0.3);
+            border: 1px solid rgba(157, 78, 221, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
         .form-control {
-            border-radius: 50px;
-            padding: 0.8rem 1.2rem;
-            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255, 255, 255, 0.08);
             color: white;
-            border: none;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            transition: all 0.3s ease;
         }
+
         .form-control:focus {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.3);
             color: white;
+            border-color: var(--neon-purple);
         }
+
         .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
         }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-purple);
+        }
+
         .btn-login {
-            background: linear-gradient(to right, #6a11cb, #2575fc);
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
             border: none;
-            border-radius: 50px;
-            padding: 0.8rem;
+            border-radius: 8px;
+            padding: 1rem;
             font-weight: 600;
             transition: all 0.3s ease;
             width: 100%;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
         }
+
         .btn-login:hover {
-            transform: scale(1.03);
-            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(157, 78, 221, 0.6);
         }
+
         .error-text {
             color: #ff4d94;
             text-align: center;
             margin-top: 1rem;
+            background: rgba(255, 77, 148, 0.1);
+            padding: 0.5rem;
+            border-radius: 5px;
+            border-left: 3px solid #ff4d94;
         }
+
         .extra-links {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             text-align: center;
+            font-size: 0.9rem;
         }
+
         .extra-links a {
-            color: #2575fc;
+            color: var(--neon-blue);
             text-decoration: none;
             font-weight: 500;
+            transition: all 0.2s ease;
         }
+
         .extra-links a:hover {
+            color: var(--neon-purple);
+            text-shadow: 0 0 8px rgba(157, 78, 221, 0.5);
+        }
+
+        .admin-reference {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .admin-reference a {
+            color: var(--neon-purple);
+            text-decoration: none;
+        }
+
+        .admin-reference a:hover {
             text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .login-card {
+                padding: 1.5rem;
+                margin: 0 1rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
 
+<!-- Starfield Background -->
+<div class="stars" id="stars"></div>
+
 <div class="login-card">
-    <h2 class="text-center fw-bold mb-4">Login</h2>
+    <div class="login-header">
+        <h1 class="logo">STARFACTOR</h1>
+        <p class="subtitle">Interstellar Access Portal</p>
+    </div>
 
     <!-- If user is already logged in -->
     <div th:if="${session.loggedInUser != null}" class="text-center">
@@ -92,31 +226,69 @@
 
     <!-- Login Form -->
     <form th:if="${session.loggedInUser == null}" th:action="@{/loginUser}" method="post">
-        <div class="mb-3">
+        <div class="mb-3 input-icon">
             <label class="form-label">Username</label>
             <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+            <i class="fas fa-user-astronaut"></i>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-4 input-icon">
             <label class="form-label">Password</label>
             <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+            <i class="fas fa-lock"></i>
         </div>
 
-        <button type="submit" class="btn btn-login">Login</button>
+        <button type="submit" class="btn btn-login">
+            <i class="fas fa-rocket me-2"></i>Launch Login
+        </button>
 
         <!-- Error message -->
-        <p th:if="${error}" th:text="${error}" class="error-text"></p>
+        <p th:if="${error}" th:text="${error}" class="error-text mt-3"></p>
 
         <!-- Register link -->
         <div class="extra-links">
-            <p>Don't have an account?
-                <a th:href="@{/registerU}">Register</a>
+            <p>New to StarFactor?
+                <a th:href="@{/registerU}">Create Stellar Account</a>
             </p>
+        </div>
+
+        <!-- Admin login reference -->
+        <div class="admin-reference">
+            <p>Administrator access? <a th:href="@{/loginA}">Login here</a></p>
         </div>
     </form>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Starfield Animation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const starsContainer = document.getElementById('stars');
+        const starsCount = 150;
+
+        for (let i = 0; i < starsCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+
+            // Random properties for each star
+            const size = Math.random() * 3;
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100;
+            const animationDuration = (Math.random() * 5) + 5;
+            const animationDelay = Math.random() * 5;
+
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${posX}vw`;
+            star.style.top = `${posY}vh`;
+            star.style.animationDuration = `${animationDuration}s`;
+            star.style.animationDelay = `${animationDelay}s`;
+
+            starsContainer.appendChild(star);
+        }
+    });
+</script>
 </body>
 </html>

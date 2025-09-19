@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#8B5CF6',
-                        secondary: '#EC4899',
-                        dark: '#1F2937',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -29,181 +16,84 @@
             display: flex;
             flex-direction: column;
         }
-        .login-card {
-            background: rgba(31, 41, 55, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .input-field {
-            transition: all 0.3s ease;
-        }
-        .input-field:focus {
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
-        }
-        .login-btn {
-            position: relative;
-            overflow: hidden;
-        }
+        .login-card { background: rgba(31, 41, 55, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .input-field { transition: all 0.3s ease; }
+        .input-field:focus { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3); }
+        .login-btn { position: relative; overflow: hidden; }
         .login-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: 0.5s;
         }
-        .login-btn:hover::after {
-            left: 100%;
-        }
+        .login-btn:hover::after { left: 100%; }
     </style>
 </head>
 <body class="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-<!-- Background elements -->
 <div class="absolute inset-0 z-0 overflow-hidden">
-    <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary rounded-full blur-3xl opacity-20 animate-pulse"></div>
-    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
 </div>
 
 <!-- Login container -->
 <div class="flex flex-col items-center justify-center w-full max-w-md mx-auto z-10">
-    <!-- Logo and title -->
+    <!-- Logo -->
     <div class="text-center mb-8">
-        <div class="flex items-center justify-center">
-            <i class="fas fa-star text-primary text-4xl"></i>
-            <span class="ml-2 text-3xl font-bold">Vote<span class="text-primary">Star</span></span>
-        </div>
+        <i class="fas fa-star text-purple-500 text-4xl"></i>
+        <span class="ml-2 text-3xl font-bold">Vote<span class="text-purple-500">Star</span></span>
         <h2 class="mt-6 text-2xl font-bold">Admin Portal</h2>
         <p class="mt-2 text-gray-400">Access the reality show voting system dashboard</p>
     </div>
 
     <!-- Login card -->
     <div class="login-card w-full rounded-2xl p-8">
-        <form class="space-y-6" action="/admin/login" method="POST">
-            <!-- Username field -->
+        <!-- ✅ Spring form action -->
+        <form class="space-y-6" th:action="@{/admin/login}" method="post">
+
+            <!-- Admin Name -->
             <div>
-                <label for="adminId" class="block text-sm font-medium text-gray-300">Admin ID</label>
+                <label for="adminName" class="block text-sm font-medium text-gray-300">Admin Name</label>
                 <div class="mt-1 relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-500"></i>
-                    </div>
-                    <input id="adminId" name="adminId" type="text" autocomplete="adminId" required
-                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
-                           placeholder="Enter your admin ID">
+                    <i class="fas fa-user absolute left-3 top-3 text-gray-500"></i>
+                    <input id="adminName" name="adminName" type="text" required
+                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none"
+                           placeholder="Enter admin name">
                 </div>
             </div>
 
-            <!-- Password field -->
+            <!-- Password -->
             <div>
-                <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                <label for="adminPassword" class="block text-sm font-medium text-gray-300">Password</label>
                 <div class="mt-1 relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-500"></i>
-                    </div>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required
-                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+                    <i class="fas fa-lock absolute left-3 top-3 text-gray-500"></i>
+                    <input id="adminPassword" name="adminPassword" type="password" required
+                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none"
                            placeholder="Enter your password">
                 </div>
             </div>
 
-            <!-- Remember me and Forgot password -->
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox"
-                           class="h-4 w-4 text-primary focus:ring-primary border-gray-600 rounded bg-gray-700">
-                    <label for="remember-me" class="ml-2 block text-sm text-gray-300">Remember me</label>
-                </div>
-
-                <div class="text-sm">
-                    <a href="#" class="font-medium text-primary hover:text-purple-400">Forgot password?</a>
-                </div>
-            </div>
-
-            <!-- Submit button -->
+            <!-- Submit -->
             <div>
                 <button type="submit"
-                        class="login-btn w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-secondary hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300">
+                        class="login-btn w-full py-3 px-4 rounded-lg text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                     <i class="fas fa-sign-in-alt mr-2"></i> Login
                 </button>
             </div>
         </form>
 
-        <!-- Security notice -->
-        <div class="mt-6 p-4 bg-gray-900 rounded-lg">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-info-circle text-primary"></i>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-white">Security Notice</h3>
-                    <div class="mt-2 text-sm text-gray-400">
-                        <p>This portal is restricted to authorized personnel only. Any unauthorized access attempts will be logged and reported.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Error -->
+        <p th:if="${error}" th:text="${error}" class="mt-4 text-center text-red-400 font-semibold"></p>
     </div>
 
     <!-- Back to home -->
     <div class="mt-6 text-center">
-        <a href="#" class="text-sm font-medium text-primary hover:text-purple-400">
-            <i class="fas fa-arrow-left mr-1"></i> Back to home page
+        <a href="/" class="text-sm font-medium text-purple-500 hover:text-pink-400">
+            <i class="fas fa-arrow-left mr-1"></i> Back to home
         </a>
     </div>
 </div>
 
-<!-- Footer -->
 <footer class="mt-auto w-full py-4 text-center text-gray-500 text-sm">
-    <p>© 2023 VoteStar Reality Show Voting System. All rights reserved.</p>
+    <p>© 2025 VoteStar Reality Show Voting System. All rights reserved.</p>
 </footer>
-
-<script>
-    // Simple form validation and animation
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form');
-        const inputs = document.querySelectorAll('input');
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            let isValid = true;
-
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    input.classList.add('border', 'border-red-500');
-                } else {
-                    input.classList.remove('border', 'border-red-500');
-                }
-            });
-
-            if (isValid) {
-                const submitBtn = document.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Authenticating...';
-                submitBtn.disabled = true;
-
-                // Simulate authentication process
-                setTimeout(() => {
-                    alert('Login successful! Redirecting to admin dashboard...');
-                    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login';
-                    submitBtn.disabled = false;
-                }, 2000);
-            }
-        });
-
-        // Add input animations
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('ring-2', 'ring-primary', 'rounded-lg');
-            });
-
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('ring-2', 'ring-primary', 'rounded-lg');
-            });
-        });
-    });
-</script>
 </body>
 </html>

@@ -10,11 +10,9 @@ import java.util.Optional;
 @Service
 public class VoteService {
 
-    private final VoteDAO votingSessionDAO;
     private final VoteDAO voteDAO;
 
-    public VoteService(VoteDAO votingSessionDAO, VoteDAO voteDAO) {
-        this.votingSessionDAO = votingSessionDAO;
+    public VoteService(VoteDAO voteDAO) {
         this.voteDAO = voteDAO;
     }
 
@@ -25,32 +23,32 @@ public class VoteService {
 
     /** ========== GET ACTIVE SESSIONS ========== */
     public List<Vote> getActiveSessions() {
-        return votingSessionDAO.findAll().stream()
+        return voteDAO.findAll().stream()
                 .filter(Vote::isActive)
                 .toList();
     }
 
     /** ========== FIND BY ID ========== */
     public Optional<Vote> findSessionById(String sessionId) {
-        return votingSessionDAO.findById(sessionId);
+        return voteDAO.findById(sessionId);
     }
 
     /** ========== FIND BY EPISODE ID ========== */
     public List<Vote> findSessionsByEpisode(String episodeId) {
-        return votingSessionDAO.findByEpisodeId(episodeId);
+        return voteDAO.findByEpisodeId(episodeId);
     }
 
-    /** ========== SAVE NEW SESSION ========== */
+    /** ========== SAVE ========== */
     public void saveSession(Vote session) {
         voteDAO.save(session);
     }
 
-    /** ========== UPDATE SESSION ========== */
+    /** ========== UPDATE ========== */
     public int updateSession(Vote session) {
         return voteDAO.update(session);
     }
 
-    /** ========== DELETE SESSION ========== */
+    /** ========== DELETE ========== */
     public int deleteSession(String sessionId) {
         return voteDAO.delete(sessionId);
     }
@@ -61,11 +59,8 @@ public class VoteService {
             return false;
         }
         if (session.getEndTime().isBefore(session.getStartTime())) {
-            return false; // End must be after start
+            return false;
         }
-        if (session.getMaxVotesPerUser() <= 0) {
-            return false; // At least 1 vote must be allowed
-        }
-        return true;
+        return session.getMaxVotesPerUser() > 0;
     }
 }

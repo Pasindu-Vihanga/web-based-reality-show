@@ -2,69 +2,62 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Episodes Management</title>
+    <title>Admin - Contestants Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-light">
+
 <div class="container mt-4">
-    <h2 class="mb-4"><i class="fas fa-tv me-2"></i>Admin: Episodes Management</h2>
+    <h2 class="mb-4"><i class="fas fa-users me-2"></i>Admin: Contestants Management</h2>
 
     <!-- Stats -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5>Total Episodes</h5>
-                    <p th:text="${episodeList.size()}">0</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Published</h5><p>118</p></div></div></div>
-        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Pending</h5><p>15</p></div></div></div>
-        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Rejected</h5><p>9</p></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Total Contestants</h5><p th:text="${contestantList.size()}">0</p></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Active</h5><p th:text="${activeCount}">0</p></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Eliminated</h5><p th:text="${eliminatedCount}">0</p></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h5>Episodes</h5><p th:text="${episodeList.size()}">0</p></div></div></div>
     </div>
 
-    <!-- Episodes Table -->
+    <!-- Contestants Table -->
     <div class="card">
         <div class="card-header d-flex justify-content-between">
-            <h5>All Episodes</h5>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEpisodeModal">
-                <i class="fas fa-plus"></i> Add Episode
+            <h5>All Contestants</h5>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContestantModal">
+                <i class="fas fa-plus"></i> Add Contestant
             </button>
         </div>
         <div class="card-body">
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th>Episode ID</th>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Date & Time</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Episode</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="ep : ${episodeList}">
-                    <td th:text="${ep.episodeId}">Episode ID</td>
-                    <td th:text="${ep.showTitle}">Title</td>
-                    <td th:text="${ep.showType}">Type</td>
+                <tr th:each="c : ${contestantList}">
+                    <td th:text="${c.contestantId}">CID</td>
+                    <td th:text="${c.name}">Name</td>
                     <td>
-                        <span th:text="${#temporals.format(ep.showDate, 'yyyy-MM-dd')}">Date</span>
-                        <span th:text="${#temporals.format(ep.showTime, 'HH:mm')}">Time</span>
+                        <span th:if="${c.status == 'active'}" class="badge bg-success">Active</span>
+                        <span th:if="${c.status == 'eliminated'}" class="badge bg-danger">Eliminated</span>
                     </td>
+                    <td th:text="${c.show.showTitle}">Episode Title</td>
                     <td>
-                        <form th:action="@{/edit/{id}(id=${ep.episodeId})}" method="get" style="display:inline;">
-                            <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
-                        </form>
-                        <form th:action="@{/delete/{id}(id=${ep.episodeId})}" method="post" style="display:inline;">
+                        <a th:href="@{/contestant/edit/{id}(id=${c.contestantId})}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form th:action="@{/contestant/delete/{id}(id=${c.contestantId})}" method="post" style="display:inline;">
                             <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
                         </form>
                     </td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(episodeList)}">
-                    <td colspan="4" class="text-center text-muted">No episodes available.</td>
+                <tr th:if="${#lists.isEmpty(contestantList)}">
+                    <td colspan="5" class="text-center text-muted">No contestants available.</td>
                 </tr>
                 </tbody>
             </table>
@@ -72,33 +65,39 @@
     </div>
 </div>
 
-<!-- Add Episode Modal -->
-<div class="modal fade" id="addEpisodeModal" tabindex="-1">
+<!-- Add Contestant Modal -->
+<div class="modal fade" id="addContestantModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form th:action="@{/add}" method="post">
+            <form th:action="@{/contestant/add}" method="post">
                 <div class="modal-header">
-                    <h5>Add New Episode</h5>
+                    <h5>Add New Contestant</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <label>Episode ID</label>
-                    <input type="text" name="episodeId" class="form-control mb-2" required>
+                    <label>Name</label>
+                    <input type="text" name="name" class="form-control mb-2" required>
 
-                    <label>Title</label>
-                    <input type="text" name="showTitle" class="form-control mb-2" required>
+                    <label>Bio</label>
+                    <textarea name="bio" class="form-control mb-2"></textarea>
 
-                    <label>Description</label>
-                    <textarea name="showDescription" class="form-control mb-2" required></textarea>
+                    <label>Image URL</label>
+                    <input type="text" name="imageUrl" class="form-control mb-2">
 
-                    <label>Type</label>
-                    <input type="text" name="showType" class="form-control mb-2" required>
+                    <label>Status</label>
+                    <select name="status" class="form-select mb-2" required>
+                        <option value="active">Active</option>
+                        <option value="eliminated">Eliminated</option>
+                    </select>
 
-                    <label>Date</label>
-                    <input type="date" name="showDate" class="form-control mb-2" required>
-
-                    <label>Time</label>
-                    <input type="time" name="showTime" class="form-control mb-2" required>
+                    <!-- Episode Dropdown -->
+                    <label>Episode</label>
+                    <select name="show.episodeId" class="form-select mb-2" required>
+                        <option th:each="ep : ${episodeList}"
+                                th:value="${ep.episodeId}"
+                                th:text="${ep.showTitle} + ' (' + ${ep.episodeId} + ')'">
+                        </option>
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Save</button>

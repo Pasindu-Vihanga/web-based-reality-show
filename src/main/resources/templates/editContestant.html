@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Contestant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+  <div class="card shadow">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4><i class="fas fa-user-edit me-2"></i>Edit Contestant</h4>
+      <a th:href="@{/contestantView}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left"></i> Back
+      </a>
+    </div>
+    <div class="card-body">
+      <form th:action="@{/contestant/update}" th:object="${contestant}" method="post">
+        <!-- Hidden ID -->
+        <input type="hidden" th:field="*{contestantId}"/>
+
+        <!-- Name -->
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input type="text" th:field="*{name}" class="form-control" required>
+        </div>
+
+        <!-- Bio -->
+        <div class="mb-3">
+          <label class="form-label">Bio</label>
+          <textarea th:field="*{bio}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- Image URL -->
+        <div class="mb-3">
+          <label class="form-label">Image URL</label>
+          <input type="text" th:field="*{imageUrl}" class="form-control">
+          <div class="mt-2">
+            <img th:if="*{imageUrl}" th:src="@{*{imageUrl}}" class="img-thumbnail" style="max-width:150px;">
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          <select th:field="*{status}" class="form-select" required>
+            <option value="active">Active</option>
+            <option value="eliminated">Eliminated</option>
+          </select>
+        </div>
+
+        <!-- Episode Dropdown -->
+        <div class="mb-3">
+          <label class="form-label">Episode</label>
+          <select th:field="*{show.episodeId}" class="form-select" required>
+            <option th:each="ep : ${episodeList}"
+                    th:value="${ep.episodeId}"
+                    th:text="${ep.showTitle + ' (' + ep.episodeId + ')'}">
+            </option>
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

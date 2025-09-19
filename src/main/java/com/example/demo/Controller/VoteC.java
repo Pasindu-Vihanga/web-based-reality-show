@@ -2,7 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Entity.Vote;
 import com.example.demo.Service.VoteService;
-import com.example.demo.Service.VoteService;
+import com.example.demo.Service.ShowService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,18 +15,24 @@ import java.util.UUID;
 public class VoteC {
 
     private final VoteService voteService;
+    private final ShowService showService;
 
-    public VoteC(VoteService voteService) {
+    public VoteC(VoteService voteService, ShowService showService) {
         this.voteService = voteService;
+        this.showService = showService;
     }
-
 
     /** ========== VIEW ALL SESSIONS (Admin) ========== */
     @GetMapping("/voteSessionA")
     public String viewAllSessionsAdmin(Model model) {
         List<Vote> sessions = voteService.getAllSessions();
         model.addAttribute("sessionList", sessions);
-        return "voteSessionA"; // Thymeleaf template
+
+        // for dropdown in Add modal
+        model.addAttribute("episodeList", showService.getAllShows());
+        model.addAttribute("newSession", new Vote());
+
+        return "voteSessionA";
     }
 
     /** ========== VIEW ALL ACTIVE SESSIONS (User) ========== */
@@ -34,13 +40,12 @@ public class VoteC {
     public String viewAllSessionsForUser(Model model) {
         List<Vote> activeSessions = voteService.getActiveSessions();
         model.addAttribute("sessionList", activeSessions);
-        return "voteSessionU"; // Thymeleaf template
+        return "voteSessionU";
     }
 
     /** ========== ADD NEW SESSION (Form Submission) ========== */
     @PostMapping("/session/add")
     public String addSession(@ModelAttribute Vote session) {
-        // Generate unique ID if not provided
         if (session.getSessionId() == null || session.getSessionId().isBlank()) {
             session.setSessionId(UUID.randomUUID().toString());
         }
@@ -57,7 +62,8 @@ public class VoteC {
         Optional<Vote> session = voteService.findSessionById(sessionId);
         if (session.isPresent()) {
             model.addAttribute("session", session.get());
-            return "editSession"; // new Thymeleaf template for editing
+            model.addAttribute("episodeList", showService.getAllShows()); // for dropdown
+            return "editSession";
         } else {
             return "redirect:/voteSessionA";
         }

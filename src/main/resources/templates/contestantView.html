@@ -2,81 +2,147 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Contestant Management - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Contestants Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand text-white" href="#">Reality Show Admin</a>
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="/episodeView">Shows</a></li>
-            <li class="nav-item"><a class="nav-link" href="/sessionView">Sessions</a></li>
-            <li class="nav-item"><a class="nav-link" href="/contestantView">Contestants</a></li>
-        </ul>
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-users me-2"></i>Admin: Contestants Management</h2>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card"><div class="card-body">
+                <h5>Total Contestants</h5>
+                <p th:text="${contestantList.size()}">0</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card"><div class="card-body">
+                <h5>Active</h5>
+                <p th:text="${activeCount}">0</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card"><div class="card-body">
+                <h5>Eliminated</h5>
+                <p th:text="${eliminatedCount}">0</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card"><div class="card-body">
+                <h5>Episodes</h5>
+                <p th:text="${episodeList.size()}">0</p>
+            </div></div>
+        </div>
     </div>
-</nav>
 
-<div class="container my-5">
-    <h1 class="text-2xl font-bold mb-4">Contestant Management</h1>
-
-    <!-- Add Contestant Form -->
-    <form th:action="@{/contestant/add}" method="post" class="mb-5 card p-4 shadow-lg">
-        <h5 class="mb-3 font-semibold">Add New Contestant</h5>
-        <div class="mb-3">
-            <input type="text" name="name" placeholder="Contestant Name" class="form-control" required>
+    <!-- Contestants Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <h5>All Contestants</h5>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContestantModal">
+                <i class="fas fa-plus"></i> Add Contestant
+            </button>
         </div>
-        <div class="mb-3">
-            <textarea name="bio" placeholder="Contestant Bio" class="form-control"></textarea>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Episode</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${contestantList}">
+                    <td th:text="${c.contestantId}">CID</td>
+                    <td th:text="${c.name}">Name</td>
+                    <td>
+                        <span th:if="${c.status == 'active'}" class="badge bg-success">Active</span>
+                        <span th:if="${c.status == 'eliminated'}" class="badge bg-danger">Eliminated</span>
+                    </td>
+                    <td>
+                        <strong th:text="${c.show.showTitle}">Episode Title</strong><br>
+                        <small class="text-muted">
+                            <span th:text="${#temporals.format(c.show.showDate, 'yyyy-MM-dd')}">2025-09-19</span>
+                            |
+                            <span th:text="${#temporals.format(c.show.showTime, 'HH:mm')}">20:00</span>
+                        </small>
+                    </td>
+                    <td>
+                        <a th:href="@{/contestant/edit/{id}(id=${c.contestantId})}"
+                           class="btn btn-sm btn-warning me-1">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form th:action="@{/contestant/delete/{id}(id=${c.contestantId})}" method="post" style="display:inline;">
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(contestantList)}">
+                    <td colspan="5" class="text-center text-muted">No contestants available.</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="mb-3">
-            <input type="text" name="imageUrl" placeholder="Image URL" class="form-control">
-        </div>
-        <div class="mb-3">
-            <select name="status" class="form-select" required>
-                <option value="active">Active</option>
-                <option value="eliminated">Eliminated</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <input type="text" name="show.episodeId" placeholder="Episode ID" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Contestant</button>
-    </form>
-
-    <!-- Contestant List -->
-    <table class="table table-striped table-hover shadow">
-        <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Episode</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="contestant : ${contestantList}">
-            <td th:text="${contestant.contestantId}"></td>
-            <td th:text="${contestant.name}"></td>
-            <td th:text="${contestant.status}"></td>
-            <td th:text="${contestant.show.episodeId}"></td>
-            <td>
-                <a th:href="@{'/contestant/edit/' + ${contestant.contestantId}}" class="btn btn-sm btn-warning">Edit</a>
-                <form th:action="@{'/contestant/delete/' + ${contestant.contestantId}}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    </div>
 </div>
 
-<footer class="bg-dark text-white text-center py-3 mt-5">
-    © 2025 Reality Show Voting Platform - Admin Panel
-</footer>
+<!-- Add Contestant Modal -->
+<div class="modal fade" id="addContestantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/contestant/add}" method="post" th:object="${newContestant}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Contestant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
+                <div class="modal-body">
+                    <label class="form-label">Name</label>
+                    <input type="text" th:field="*{name}" class="form-control mb-2" required>
+
+                    <label class="form-label">Bio</label>
+                    <textarea th:field="*{bio}" class="form-control mb-2"></textarea>
+
+                    <label class="form-label">Image URL</label>
+                    <input type="text" th:field="*{imageUrl}" class="form-control mb-2">
+
+                    <label class="form-label">Status</label>
+                    <select th:field="*{status}" class="form-select mb-2" required>
+                        <option value="active">Active</option>
+                        <option value="eliminated">Eliminated</option>
+                    </select>
+
+                    <!-- Episode Dropdown -->
+                    <label class="form-label">Episode</label>
+                    <select th:field="*{show.episodeId}" class="form-select mb-2" required>
+                        <option value="" disabled selected>Select an episode…</option>
+                        <option th:each="ep : ${episodeList}"
+                                th:value="${ep.episodeId}"
+                                th:text="${ep.showTitle + ' (' + ep.episodeId + ')'}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

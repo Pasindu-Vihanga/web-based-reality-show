@@ -1,8 +1,13 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Contestant;
+import com.example.demo.Entity.Result;
+import com.example.demo.Entity.User;
+import com.example.demo.Entity.Vote;
 import com.example.demo.Service.ContestantService;
-import com.example.demo.Service.ShowService;
+import com.example.demo.Service.ResultService;
+import com.example.demo.Service.VoteService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,26 +20,24 @@ import java.util.UUID;
 public class ContestantC {
 
     private final ContestantService contestantService;
-    private final ShowService showService;
+    private final VoteService voteService;
+    private final ResultService resultService;
 
-    public ContestantC(ContestantService contestantService, ShowService showService) {
+    public ContestantC(ContestantService contestantService,
+                       VoteService voteService,
+                       ResultService resultService) {
         this.contestantService = contestantService;
-        this.showService = showService;
+        this.voteService = voteService;
+        this.resultService = resultService;
     }
 
     /* ================== ADMIN: VIEW ALL ================== */
     @GetMapping("/contestantView")
-    public String viewAllContestantsAdmin(Model model) {
+    public String viewAllContestantsAdmin(Model model, HttpSession session) {
         List<Contestant> contestants = contestantService.getAllContestants();
         model.addAttribute("contestantList", contestants);
 
-        // Dropdown episodes for Add modal
-        model.addAttribute("episodeList", showService.getAllShows());
-
-        // For modal form binding
-        model.addAttribute("newContestant", new Contestant());
-
-        // Optional stats
+        // Stats
         model.addAttribute("activeCount", contestantService.findByStatus("active").size());
         model.addAttribute("eliminatedCount", contestantService.findByStatus("eliminated").size());
 
@@ -43,7 +46,14 @@ public class ContestantC {
 
     /* ================== USER: VIEW BY EPISODE ================== */
     @GetMapping("/contestantForUser/{episodeId}")
-    public String viewContestantsForUser(@PathVariable("episodeId") String episodeId, Model model) {
+    public String viewContestantsForUser(@PathVariable("episodeId") String episodeId,
+                                         Model model,
+                                         HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU";
+        }
+
         List<Contestant> contestants = contestantService.findByEpisodeId(episodeId);
         model.addAttribute("contestantList", contestants);
         return "contestantForUser";
@@ -67,7 +77,6 @@ public class ContestantC {
         Optional<Contestant> contestant = contestantService.findContestantById(contestantId);
         if (contestant.isPresent()) {
             model.addAttribute("contestant", contestant.get());
-            model.addAttribute("episodeList", showService.getAllShows()); // Dropdown
             return "editContestant";
         } else {
             return "redirect:/contestantView";
@@ -92,18 +101,61 @@ public class ContestantC {
 
     /* ================== USER: VOTE ================== */
     @PostMapping("/vote/{id}")
-    public String voteForContestant(@PathVariable("id") String contestantId, Model model) {
-        Optional<Contestant> contestant = contestantService.findContestantById(contestantId);
-
-        if (contestant.isPresent() && "active".equalsIgnoreCase(contestant.get().getStatus())) {
-            // 🔹 Here you’d implement vote persistence (not shown in your DAO/service yet)
-            model.addAttribute("message", "Vote cast successfully for " + contestant.get().getName());
-        } else {
-            model.addAttribute("error", "Cannot vote for this contestant.");
+    public String voteForContestant(@PathVariable("id") String contestantId,
+                                    HttpSession session,
+                                    Model model) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU"; // must login
         }
 
-        // redirect back to same episode’s contestant list
-        return contestant.map(c -> "redirect:/contestantForUser/" + c.getShow().getEpisodeId())
-                .orElse("redirect:/epiforUser");
+        Optional<Contestant> contestantOpt = contestantService.findContestantById(contestantId);
+        if (contestantOpt.isEmpty()) {
+            model.addAttribute("error", "Contestant not found.");
+            return "redirect:/epiforUser";
+        }
+
+        Contestant contestant = contestantOpt.get();
+
+        if (!"active".equalsIgnoreCase(contestant.getStatus())) {
+            model.addAttribute("error", "Cannot vote for eliminated contestant.");
+            return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+        }
+
+        // 1. Find active voting session for this episode
+        List<Vote> activeSessions = voteService.getActiveSessions();
+        Vote sessionForEpisode = activeSessions.stream()
+                .filter(s -> s.getShow().getEpisodeId().equals(contestant.getShow().getEpisodeId()))
+                .findFirst()
+                .orElse(null);
+
+        if (sessionForEpisode == null) {
+            model.addAttribute("error", "No active voting session for this episode.");
+            return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+        }
+
+        // 2. Update or create result
+        List<Result> results = resultService.findBySessionId(sessionForEpisode.getSessionId());
+        Optional<Result> existingResult = results.stream()
+                .filter(r -> r.getContestant().getContestantId().equals(contestant.getContestantId()))
+                .findFirst();
+
+        if (existingResult.isPresent()) {
+            Result r = existingResult.get();
+            r.setVotesCount(r.getVotesCount() + 1);
+            resultService.updateResult(r);
+        } else {
+            Result newResult = new Result();
+            newResult.setVotingSession(sessionForEpisode);
+            newResult.setContestant(contestant);
+            newResult.setVotesCount(1);
+            newResult.setStatus("safe"); // default
+            resultService.saveResult(newResult);
+        }
+
+        model.addAttribute("message", "Your vote has been recorded!");
+
+        // Redirect back to episode’s contestant list
+        return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
     }
 }

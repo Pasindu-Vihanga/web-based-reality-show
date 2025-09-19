@@ -2,6 +2,8 @@ package com.example.demo.Service;
 
 import com.example.demo.DAO.ResultDAO;
 import com.example.demo.Entity.Result;
+import com.example.demo.Entity.Contestant;
+import com.example.demo.Entity.Vote;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,53 +18,57 @@ public class ResultService {
         this.resultDAO = resultDAO;
     }
 
-    /** ========== SAVE NEW RESULT ========== */
     public void saveResult(Result result) {
         resultDAO.save(result);
     }
 
-    /** ========== UPDATE RESULT ========== */
     public int updateResult(Result result) {
         return resultDAO.update(result);
     }
 
-    /** ========== DELETE RESULT ========== */
     public int deleteResult(Long resultId) {
         return resultDAO.delete(resultId);
     }
 
-    /** ========== FIND ALL RESULTS ========== */
     public List<Result> getAllResults() {
         return resultDAO.findAll();
     }
 
-    /** ========== FIND RESULTS BY SESSION ========== */
     public List<Result> findBySessionId(String sessionId) {
         return resultDAO.findBySessionId(sessionId);
     }
 
-    /** ========== FIND RESULT BY ID ========== */
     public Optional<Result> findById(Long resultId) {
         return resultDAO.findById(resultId);
     }
 
-    /** ========== VALIDATION LOGIC ========== */
     public boolean validateResult(Result result) {
-        if (result.getVotingSession() == null || result.getVotingSession().getSessionId() == null) {
-            return false; // must be linked to a session
-        }
-        if (result.getContestant() == null || result.getContestant().getContestantId() == null) {
-            return false; // must be linked to a contestant
-        }
-        if (result.getVotesCount() < 0) {
-            return false; // votes cannot be negative
-        }
-        if (result.getPlace() != null && result.getPlace() <= 0) {
-            return false; // place must be positive if set
-        }
-        if (result.getStatus() == null || result.getStatus().isBlank()) {
-            return false; // must have a status
-        }
+        if (result.getVotingSession() == null || result.getVotingSession().getSessionId() == null) return false;
+        if (result.getContestant() == null || result.getContestant().getContestantId() == null) return false;
+        if (result.getVotesCount() < 0) return false;
+        if (result.getPlace() != null && result.getPlace() <= 0) return false;
+        if (result.getStatus() == null || result.getStatus().isBlank()) return false;
         return true;
+    }
+
+    /** ================== CAST VOTE ================== */
+    public void castVote(String sessionId, String contestantId) {
+        // Check if contestant already has a result row for this session
+        Optional<Result> existing = resultDAO.findBySessionId(sessionId).stream()
+                .filter(r -> r.getContestant().getContestantId().equals(contestantId))
+                .findFirst();
+
+        if (existing.isPresent()) {
+            resultDAO.incrementVote(sessionId, contestantId);
+        } else {
+            // Create new result record
+            Result newResult = new Result();
+            newResult.setVotingSession(new Vote(sessionId, null, null, null, true, 1));
+            newResult.setContestant(new Contestant(contestantId, null, null, null, "active", null));
+            newResult.setVotesCount(1);
+            newResult.setPlace(null);
+            newResult.setStatus("safe");
+            resultDAO.save(newResult);
+        }
     }
 }

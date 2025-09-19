@@ -9,25 +9,46 @@
 <body class="bg-gray-100">
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
     <div class="container">
-        <a class="navbar-brand text-white" href="#">Reality Show Admin</a>
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="/episodeView">Manage Shows</a></li>
-            <li class="nav-item"><a class="nav-link" href="/voteSessionA">Manage Voting Sessions</a></li>
-            <li class="nav-item"><a class="nav-link active" href="/resultsA">Manage Results</a></li>
-            <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
-        </ul>
+        <a class="navbar-brand fw-bold text-white" href="/admin/dashboard">Reality Show Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/episodeView">Manage Shows</a></li>
+                <li class="nav-item"><a class="nav-link" href="/contestantView">Manage Contestants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/voteSessionA">Voting Sessions</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/resultsA">Results</a></li>
+
+                <!-- Admin Dropdown -->
+                <li class="nav-item dropdown" th:if="${admin != null}">
+                    <a class="nav-link dropdown-toggle text-info" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-shield"></i>
+                        <span th:text="${admin.adminName}">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/admin/logout">Logout</a></li>
+                    </ul>
+                </li>
+
+                <!-- If no admin in session -->
+                <li class="nav-item" th:if="${admin == null}">
+                    <a class="nav-link text-warning" href="/loginA">Login</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
-<!-- Container -->
+<!-- Page Content -->
 <div class="container my-5">
-    <h1 class="mb-4 text-2xl font-bold">Results Management</h1>
+    <h1 class="mb-4 text-2xl fw-bold">Results Management</h1>
 
     <!-- Results Table -->
-    <div class="card shadow">
-        <div class="card-header d-flex justify-content-between">
+    <div class="card shadow mb-5">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">All Results</h5>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResultModal">
                 <i class="fas fa-plus"></i> Add Result
@@ -37,9 +58,8 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>Result ID</th>
+                    <th>ID</th>
                     <th>Session</th>
-                    <th>Episode</th>
                     <th>Contestant</th>
                     <th>Votes</th>
                     <th>Place</th>
@@ -49,16 +69,15 @@
                 </thead>
                 <tbody>
                 <tr th:each="r : ${resultList}">
-                    <td th:text="${r.resultId}">RID</td>
-                    <td th:text="${r.votingSession.sessionId}">SID</td>
-                    <td th:text="${r.votingSession.show.showTitle}">Episode Title</td>
-                    <td th:text="${r.contestant.name}">Contestant</td>
+                    <td th:text="${r.resultId}">1</td>
+                    <td th:text="${r.votingSession.show.showTitle}">Session Title</td>
+                    <td th:text="${r.contestant.name}">Contestant Name</td>
                     <td th:text="${r.votesCount}">0</td>
                     <td th:text="${r.place}">1</td>
                     <td>
                         <span th:if="${r.status == 'winner'}" class="badge bg-success">Winner</span>
-                        <span th:if="${r.status == 'eliminated'}" class="badge bg-danger">Eliminated</span>
                         <span th:if="${r.status == 'safe'}" class="badge bg-secondary">Safe</span>
+                        <span th:if="${r.status == 'eliminated'}" class="badge bg-danger">Eliminated</span>
                     </td>
                     <td>
                         <a th:href="@{/result/edit/{id}(id=${r.resultId})}" class="btn btn-sm btn-warning me-1">
@@ -72,7 +91,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(resultList)}">
-                    <td colspan="8" class="text-center text-muted">No results available.</td>
+                    <td colspan="7" class="text-center text-muted">No results available.</td>
                 </tr>
                 </tbody>
             </table>
@@ -97,7 +116,8 @@
                         <option value="" disabled selected>Select a session…</option>
                         <option th:each="s : ${sessionList}"
                                 th:value="${s.sessionId}"
-                                th:text="${s.show.showTitle + ' - ' + s.sessionId}"></option>
+                                th:text="${s.show.showTitle}">
+                        </option>
                     </select>
 
                     <!-- Contestant Dropdown -->
@@ -106,15 +126,19 @@
                         <option value="" disabled selected>Select a contestant…</option>
                         <option th:each="c : ${contestantList}"
                                 th:value="${c.contestantId}"
-                                th:text="${c.name + ' (' + c.contestantId + ')'}"></option>
+                                th:text="${c.name}">
+                        </option>
                     </select>
 
+                    <!-- Votes -->
                     <label class="form-label">Votes Count</label>
                     <input type="number" th:field="*{votesCount}" class="form-control mb-3" min="0" required>
 
+                    <!-- Place -->
                     <label class="form-label">Place</label>
                     <input type="number" th:field="*{place}" class="form-control mb-3" min="1">
 
+                    <!-- Status -->
                     <label class="form-label">Status</label>
                     <select th:field="*{status}" class="form-select mb-3" required>
                         <option value="winner">Winner</option>
@@ -131,11 +155,6 @@
         </div>
     </div>
 </div>
-
-<!-- Footer -->
-<footer class="bg-dark text-center text-white py-3 mt-5">
-    © 2025 Reality Show Voting Platform - Admin Panel
-</footer>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

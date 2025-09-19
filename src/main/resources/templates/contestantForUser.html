@@ -21,7 +21,7 @@
         <a class="navbar-brand font-bold text-indigo-600" href="/dashboardU">Reality Show Voting</a>
         <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link" href="/epiforUser">Episodes</a></li>
-            <li class="nav-item"><a class="nav-link" href="/results">Results</a></li>
+            <li class="nav-item"><a class="nav-link" href="/resultsU">Results</a></li>
             <li class="nav-item"><a class="nav-link text-danger" href="/logout">Logout</a></li>
         </ul>
     </div>
@@ -60,6 +60,7 @@
                         </button>
                     </form>
 
+                    <!-- Eliminated -->
                     <button th:if="${contestant.status == 'eliminated'}"
                             class="btn btn-secondary mt-2 w-100" disabled>
                         Eliminated

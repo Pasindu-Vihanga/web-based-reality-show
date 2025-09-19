@@ -23,17 +23,14 @@ public class ResultDAO {
     private final RowMapper<Result> resultRowMapper = new RowMapper<>() {
         @Override
         public Result mapRow(ResultSet rs, int rowNum) throws SQLException {
-            // Map Contestant (only ID, name loaded if joined)
             Contestant contestant = new Contestant();
             contestant.setContestantId(rs.getString("contestant_id"));
             contestant.setName(rs.getString("contestant_name"));
 
-            // Map Show (optional for debugging)
             Show show = new Show();
             show.setEpisodeId(rs.getString("episode_id"));
             show.setShowTitle(rs.getString("show_title"));
 
-            // Map Voting Session
             Vote voteSession = new Vote();
             voteSession.setSessionId(rs.getString("session_id"));
             voteSession.setShow(show);
@@ -51,8 +48,7 @@ public class ResultDAO {
 
     /** ================== SAVE ================== */
     public void save(Result result) {
-        String sql = "INSERT INTO results (session_id, contestant_id, votes_count, place, status) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO results (session_id, contestant_id, votes_count, place, status) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 result.getVotingSession().getSessionId(),
                 result.getContestant().getContestantId(),
@@ -64,8 +60,7 @@ public class ResultDAO {
 
     /** ================== UPDATE ================== */
     public int update(Result result) {
-        String sql = "UPDATE results SET session_id = ?, contestant_id = ?, votes_count = ?, place = ?, status = ? " +
-                "WHERE result_id = ?";
+        String sql = "UPDATE results SET session_id=?, contestant_id=?, votes_count=?, place=?, status=? WHERE result_id=?";
         return jdbcTemplate.update(sql,
                 result.getVotingSession().getSessionId(),
                 result.getContestant().getContestantId(),
@@ -78,7 +73,7 @@ public class ResultDAO {
 
     /** ================== DELETE ================== */
     public int delete(Long resultId) {
-        String sql = "DELETE FROM results WHERE result_id = ?";
+        String sql = "DELETE FROM results WHERE result_id=?";
         return jdbcTemplate.update(sql, resultId);
     }
 
@@ -90,7 +85,7 @@ public class ResultDAO {
             JOIN contestant c ON r.contestant_id = c.contestant_id
             JOIN voting_session v ON r.session_id = v.session_id
             JOIN showepi s ON v.episode_id = s.episode_id
-            """;
+        """;
         return jdbcTemplate.query(sql, resultRowMapper);
     }
 
@@ -102,9 +97,9 @@ public class ResultDAO {
             JOIN contestant c ON r.contestant_id = c.contestant_id
             JOIN voting_session v ON r.session_id = v.session_id
             JOIN showepi s ON v.episode_id = s.episode_id
-            WHERE r.session_id = ?
+            WHERE r.session_id=?
             ORDER BY r.place ASC
-            """;
+        """;
         return jdbcTemplate.query(sql, resultRowMapper, sessionId);
     }
 
@@ -116,13 +111,18 @@ public class ResultDAO {
             JOIN contestant c ON r.contestant_id = c.contestant_id
             JOIN voting_session v ON r.session_id = v.session_id
             JOIN showepi s ON v.episode_id = s.episode_id
-            WHERE r.result_id = ?
-            """;
+            WHERE r.result_id=?
+        """;
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, resultRowMapper, resultId));
         } catch (Exception e) {
             return Optional.empty();
         }
     }
-}
 
+    /** ================== INCREMENT VOTE ================== */
+    public void incrementVote(String sessionId, String contestantId) {
+        String sql = "UPDATE results SET votes_count = votes_count + 1 WHERE session_id=? AND contestant_id=?";
+        jdbcTemplate.update(sql, sessionId, contestantId);
+    }
+}

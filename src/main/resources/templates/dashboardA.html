@@ -70,6 +70,7 @@
     <a th:href="@{/voteSessionA}"><i class="fas fa-vote-yea me-2"></i> Manage Voting Sessions</a>
     <a th:href="@{/resultsA}"><i class="fas fa-trophy me-2"></i> Manage Results</a>
     <a th:href="@{/userView}"><i class="fas fa-user-cog me-2"></i> Manage Users</a>
+    <a th:href="@{/admin/manage}"><i class="fas fa-user-cog me-2"></i> Manage Admins</a>
     <a th:href="@{/logout}" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
 </div>
 
@@ -122,6 +123,17 @@
                     <a th:href="@{/episodeView}" class="btn btn-sm btn-outline-light">Go</a>
                 </div>
             </div>
+
+            <!-- Feedback -->
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <i class="fas fa-tv text-purple-400"></i>
+                    <h5>Episodes</h5>
+                    <p class="text-gray-300">Manage all Feedbacks</p>
+                    <a th:href="@{/admin/feedbackA}" class="btn btn-sm btn-outline-light">Go</a>
+                </div>
+            </div>
+
             <!-- Contestants -->
             <div class="col-md-3">
                 <div class="card text-center">

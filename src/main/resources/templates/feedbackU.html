@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User - My Feedback</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-indigo-600" href="/dashboardU">Reality Show</a>
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/epiforUser">Episodes</a></li>
+            <li class="nav-item"><a class="nav-link" href="/resultsU">Results</a></li>
+            <li class="nav-item"><a class="nav-link active" href="/feedbackU">Feedback</a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="/logout">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <h2 class="fw-bold text-2xl mb-4">My Feedback</h2>
+
+    <!-- Feedback Form -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Submit New Feedback</h5>
+            <form th:action="@{/feedback/add}" method="post" th:object="${newFeedback}">
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea th:field="*{message}" class="form-control" rows="3"
+                              placeholder="Write your feedback..." required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rating (1-5)</label>
+                    <input type="number" th:field="*{rating}" class="form-control" min="1" max="5">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback History -->
+    <div class="card shadow">
+        <div class="card-body">
+            <h5 class="mb-3">My Previous Feedback</h5>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Message</th>
+                    <th>Rating</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="f : ${feedbackList}">
+                    <td th:text="${f.feedbackId}">1</td>
+                    <td th:text="${f.message}">Great platform!</td>
+                    <td th:text="${f.rating != null ? f.rating : '-'}">5</td>
+                    <td th:text="${#temporals.format(f.submittedAt, 'yyyy-MM-dd HH:mm')}">2025-09-19</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(feedbackList)}">
+                    <td colspan="4" class="text-center text-muted">You have not submitted any feedback yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-light text-center py-3 mt-5 shadow-inner">
+    © 2025 Reality Show Voting Platform - User Panel
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

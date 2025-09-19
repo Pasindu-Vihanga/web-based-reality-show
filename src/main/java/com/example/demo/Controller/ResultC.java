@@ -1,16 +1,17 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Entity.Admin;
 import com.example.demo.Entity.Result;
 import com.example.demo.Entity.User;
 import com.example.demo.Entity.Vote;
 import com.example.demo.Service.ResultService;
 import com.example.demo.Service.VoteService;
 import com.example.demo.Service.ContestantService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -31,15 +32,15 @@ public class ResultC {
     /** ========== VIEW ALL RESULTS (ADMIN) ========== */
     @GetMapping("/resultsA")
     public String viewAllResultsAdmin(Model model, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
-            return "redirect:/loginU"; // protect page
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA"; // only admins allowed
         }
 
         List<Result> results = resultService.getAllResults();
         model.addAttribute("resultList", results);
 
-        // Needed for dropdowns
+        // For dropdowns in Add form
         model.addAttribute("sessionList", voteService.getAllSessions());
         model.addAttribute("contestantList", contestantService.getAllContestants());
         model.addAttribute("newResult", new Result());
@@ -52,17 +53,17 @@ public class ResultC {
     public String viewActiveResults(HttpSession session, Model model) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) {
-            return "redirect:/loginU"; // must login
+            return "redirect:/loginU"; // only logged-in users
         }
 
-        // Get all active sessions
+        // Get active sessions
         List<Vote> activeSessions = voteService.getActiveSessions();
         if (activeSessions.isEmpty()) {
             model.addAttribute("message", "No active results available.");
             return "resultsU";
         }
 
-        // Pick the latest session by start time
+        // Pick latest session
         Vote latestSession = activeSessions.stream()
                 .max(Comparator.comparing(Vote::getStartTime))
                 .orElse(null);
@@ -79,9 +80,9 @@ public class ResultC {
     /** ========== ADD NEW RESULT (ADMIN) ========== */
     @PostMapping("/result/add")
     public String addResult(@ModelAttribute Result result, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
-            return "redirect:/loginU";
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
         }
 
         if (resultService.validateResult(result)) {
@@ -90,12 +91,12 @@ public class ResultC {
         return "redirect:/resultsA";
     }
 
-    /** ========== EDIT RESULT FORM ========== */
+    /** ========== EDIT RESULT FORM (ADMIN) ========== */
     @GetMapping("/result/edit/{id}")
     public String editResultForm(@PathVariable("id") Long resultId, Model model, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
-            return "redirect:/loginU";
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
         }
 
         Optional<Result> result = resultService.findById(resultId);
@@ -112,9 +113,9 @@ public class ResultC {
     /** ========== UPDATE RESULT (ADMIN) ========== */
     @PostMapping("/result/update")
     public String updateResult(@ModelAttribute Result result, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
-            return "redirect:/loginU";
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
         }
 
         if (resultService.validateResult(result)) {
@@ -126,9 +127,9 @@ public class ResultC {
     /** ========== DELETE RESULT (ADMIN) ========== */
     @PostMapping("/result/delete/{id}")
     public String deleteResult(@PathVariable("id") Long resultId, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
-            return "redirect:/loginU";
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) {
+            return "redirect:/loginA";
         }
 
         resultService.deleteResult(resultId);

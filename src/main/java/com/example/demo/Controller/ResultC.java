@@ -1,6 +1,8 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Entity.Result;
+import com.example.demo.Entity.User;
+import com.example.demo.Entity.Vote;
 import com.example.demo.Service.ResultService;
 import com.example.demo.Service.VoteService;
 import com.example.demo.Service.ContestantService;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,29 +30,60 @@ public class ResultC {
 
     /** ========== VIEW ALL RESULTS (ADMIN) ========== */
     @GetMapping("/resultsA")
-    public String viewAllResultsAdmin(Model model) {
+    public String viewAllResultsAdmin(Model model, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU"; // protect page
+        }
+
         List<Result> results = resultService.getAllResults();
         model.addAttribute("resultList", results);
 
-        // For dropdowns
+        // Needed for dropdowns
         model.addAttribute("sessionList", voteService.getAllSessions());
         model.addAttribute("contestantList", contestantService.getAllContestants());
         model.addAttribute("newResult", new Result());
 
-        return "resultsA"; // Admin template
+        return "resultsA";
     }
 
-    /** ========== VIEW RESULTS (USER by Session) ========== */
-    @GetMapping("/results/{sessionId}")
-    public String viewResultsForSession(@PathVariable("sessionId") String sessionId, Model model) {
-        List<Result> results = resultService.findBySessionId(sessionId);
-        model.addAttribute("resultList", results);
-        return "resultsU"; // User template
+    /** ========== VIEW ACTIVE SESSION RESULTS (USER) ========== */
+    @GetMapping("/resultsU")
+    public String viewActiveResults(HttpSession session, Model model) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU"; // must login
+        }
+
+        // Get all active sessions
+        List<Vote> activeSessions = voteService.getActiveSessions();
+        if (activeSessions.isEmpty()) {
+            model.addAttribute("message", "No active results available.");
+            return "resultsU";
+        }
+
+        // Pick the latest session by start time
+        Vote latestSession = activeSessions.stream()
+                .max(Comparator.comparing(Vote::getStartTime))
+                .orElse(null);
+
+        if (latestSession != null) {
+            model.addAttribute("resultList", resultService.findBySessionId(latestSession.getSessionId()));
+        } else {
+            model.addAttribute("message", "No results available for active sessions.");
+        }
+
+        return "resultsU";
     }
 
     /** ========== ADD NEW RESULT (ADMIN) ========== */
     @PostMapping("/result/add")
-    public String addResult(@ModelAttribute Result result) {
+    public String addResult(@ModelAttribute Result result, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU";
+        }
+
         if (resultService.validateResult(result)) {
             resultService.saveResult(result);
         }
@@ -57,32 +92,46 @@ public class ResultC {
 
     /** ========== EDIT RESULT FORM ========== */
     @GetMapping("/result/edit/{id}")
-    public String editResultForm(@PathVariable("id") Long resultId, Model model) {
+    public String editResultForm(@PathVariable("id") Long resultId, Model model, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU";
+        }
+
         Optional<Result> result = resultService.findById(resultId);
         if (result.isPresent()) {
             model.addAttribute("result", result.get());
             model.addAttribute("sessionList", voteService.getAllSessions());
             model.addAttribute("contestantList", contestantService.getAllContestants());
-            return "editResult"; // edit form template
+            return "editResult";
         } else {
             return "redirect:/resultsA";
         }
     }
 
-    /** ========== UPDATE RESULT ========== */
+    /** ========== UPDATE RESULT (ADMIN) ========== */
     @PostMapping("/result/update")
-    public String updateResult(@ModelAttribute Result result) {
+    public String updateResult(@ModelAttribute Result result, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU";
+        }
+
         if (resultService.validateResult(result)) {
             resultService.updateResult(result);
         }
         return "redirect:/resultsA";
     }
 
-    /** ========== DELETE RESULT ========== */
+    /** ========== DELETE RESULT (ADMIN) ========== */
     @PostMapping("/result/delete/{id}")
-    public String deleteResult(@PathVariable("id") Long resultId) {
+    public String deleteResult(@PathVariable("id") Long resultId, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/loginU";
+        }
+
         resultService.deleteResult(resultId);
         return "redirect:/resultsA";
     }
 }
-

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 public class AdminC {
@@ -97,7 +96,7 @@ public class AdminC {
         List<Admin> adminList = adminService.getAllAdmins();
         model.addAttribute("adminList", adminList);
         model.addAttribute("newAdmin", new Admin());
-        return "adminManage"; // new Thymeleaf template
+        return "adminManage"; // Thymeleaf template
     }
 
     /** ========== ADD ADMIN ========== */
@@ -108,9 +107,7 @@ public class AdminC {
             return "redirect:/loginA";
         }
 
-        if (admin.getAdminID() == null || admin.getAdminID().isBlank()) {
-            admin.setAdminID(UUID.randomUUID().toString().substring(0, 8));
-        }
+        // ✅ ID will be auto-generated in DAO via AdminIDGenerator
         adminService.saveAdmin(admin);
         return "redirect:/admin/manage";
     }
@@ -126,7 +123,7 @@ public class AdminC {
         Optional<Admin> admin = adminService.findAdminById(adminId);
         if (admin.isPresent()) {
             model.addAttribute("admin", admin.get());
-            return "editA"; // new Thymeleaf template
+            return "editA"; // Thymeleaf template
         }
         return "redirect:/admin/manage";
     }

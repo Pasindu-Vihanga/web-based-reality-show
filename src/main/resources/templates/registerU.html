@@ -16,7 +16,6 @@
             --primary-color: #4e73df;
             --secondary-color: #6f42c1;
         }
-
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
@@ -26,7 +25,6 @@
             padding: 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         .registration-card {
             background: white;
             border-radius: 15px;
@@ -35,23 +33,16 @@
             width: 100%;
             max-width: 900px;
         }
-
         .registration-header {
             background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 25px;
             text-align: center;
         }
-
         .registration-body {
             padding: 30px;
         }
-
-        .form-label {
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
+        .form-label { font-weight: 600; margin-bottom: 6px; }
         .btn-register {
             background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
             border: none;
@@ -60,37 +51,11 @@
             font-size: 1.1rem;
             transition: all 0.3s;
         }
-
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
-        }
-
-        .login-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .login-link:hover {
-            text-decoration: underline;
-            color: var(--secondary-color);
-        }
-
-        .password-toggle {
-            cursor: pointer;
-            position: absolute;
-            right: 15px;
-            top: 42px;
-            color: #6c757d;
-        }
-
-        .preview-img {
-            max-width: 100px;
-            max-height: 100px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
+        .btn-register:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4); }
+        .login-link { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+        .login-link:hover { text-decoration: underline; color: var(--secondary-color); }
+        .password-toggle { cursor: pointer; position: absolute; right: 15px; top: 42px; color: #6c757d; }
+        .preview-img { max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -105,12 +70,6 @@
         <form th:action="@{/userAdd}" method="post" enctype="multipart/form-data" novalidate>
             <div class="row">
                 <div class="col-md-6">
-                    <!-- User ID -->
-                    <div class="mb-3">
-                        <label for="userId" class="form-label">User ID *</label>
-                        <input type="text" class="form-control" id="userId" name="userId" required minlength="3">
-                    </div>
-
                     <!-- Username -->
                     <div class="mb-3">
                         <label for="username" class="form-label">Username *</label>
@@ -123,15 +82,15 @@
                         <input type="password" class="form-control" id="password" name="password" required minlength="6">
                         <span class="password-toggle" id="passwordToggle"><i class="fas fa-eye"></i></span>
                     </div>
-                </div>
 
-                <div class="col-md-6">
                     <!-- Email -->
                     <div class="mb-3">
                         <label for="email" class="form-label">Email *</label>
                         <input type="email" class="form-control" id="email" name="email" required>
                     </div>
+                </div>
 
+                <div class="col-md-6">
                     <!-- Phone -->
                     <div class="mb-3">
                         <label for="phoneNumber" class="form-label">Phone</label>
@@ -145,13 +104,13 @@
                         <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*" onchange="previewImage(event)">
                         <img id="preview" class="preview-img d-none" alt="Preview">
                     </div>
-                </div>
-            </div>
 
-            <!-- Address -->
-            <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                    <!-- Address -->
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                    </div>
+                </div>
             </div>
 
             <div class="d-grid gap-2 mt-4">

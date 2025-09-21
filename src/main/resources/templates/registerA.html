@@ -18,21 +18,7 @@
     </div>
 
     <!-- Form Section -->
-    <form action="/admin/save" method="post" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Admin ID -->
-        <div class="md:col-span-2">
-            <label class="block text-gray-700 font-medium mb-2" for="adminID">
-                Admin ID <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <i class="bi bi-person-badge text-gray-400"></i>
-                </div>
-                <input type="text" id="adminID" name="adminID" required
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                       placeholder="Enter unique admin ID">
-            </div>
-        </div>
+    <form th:action="@{/admin/add}" method="post" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- Name -->
         <div>
@@ -44,7 +30,8 @@
                     <i class="bi bi-person text-gray-400"></i>
                 </div>
                 <input type="text" id="adminName" name="adminName" required
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="Admin full name">
             </div>
         </div>
@@ -59,7 +46,8 @@
                     <i class="bi bi-lock text-gray-400"></i>
                 </div>
                 <input type="password" id="adminPassword" name="adminPassword" required
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="Create secure password">
             </div>
         </div>
@@ -74,7 +62,8 @@
                     <i class="bi bi-tag text-gray-400"></i>
                 </div>
                 <input type="text" id="roleName" name="roleName"
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="e.g., Super Admin">
             </div>
         </div>
@@ -89,7 +78,8 @@
                     <i class="bi bi-key text-gray-400"></i>
                 </div>
                 <input type="text" id="roleID" name="roleID"
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="Role identifier">
             </div>
         </div>
@@ -104,7 +94,8 @@
                     <i class="bi bi-phone text-gray-400"></i>
                 </div>
                 <input type="text" id="mobileNumber" name="mobileNumber"
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="+1 234 567 890">
             </div>
         </div>
@@ -119,7 +110,8 @@
                     <i class="bi bi-envelope text-gray-400"></i>
                 </div>
                 <input type="email" id="email" name="email"
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="admin@example.com">
             </div>
         </div>
@@ -134,7 +126,8 @@
                     <i class="bi bi-geo-alt text-gray-400"></i>
                 </div>
                 <input type="text" id="address" name="address"
-                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="Full address">
             </div>
         </div>
@@ -142,16 +135,17 @@
         <!-- Buttons -->
         <div class="md:col-span-2 flex flex-col sm:flex-row gap-3 mt-2">
             <button type="submit"
-                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg
+                           transition flex items-center justify-center">
                 <i class="bi bi-check-circle mr-2"></i> Save Admin
             </button>
-            <a href="/"
-               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+            <a th:href="@{/}"
+               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg
+                      transition flex items-center justify-center">
                 <i class="bi bi-house mr-2"></i> Back to Home
             </a>
         </div>
     </form>
-
 </div>
 </body>
 </html>

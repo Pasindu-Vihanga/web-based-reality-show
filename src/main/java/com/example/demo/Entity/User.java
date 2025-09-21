@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 @Data
 @NoArgsConstructor
@@ -13,8 +14,13 @@ import lombok.NoArgsConstructor;
 public class User {
 
     @Id
-    @Column(name = "user_id", nullable = false, unique = true, length = 9)
-    private String userId;  // e.g. WBSU0001
+    @Column(name = "user_id", nullable = false, unique = true, length = 12)
+    @GeneratedValue(generator = "user-id-generator")
+    @GenericGenerator(
+            name = "user-id-generator",
+            strategy = "com.example.demo.Config.UserID"
+    )
+    private String userId;   // auto-generated like USR000001
 
     @Column(name = "username", nullable = false, length = 50)
     private String username;
@@ -22,9 +28,10 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    // ✅ Store image path or URL instead of raw image data
-    @Column(name ="image_path", length = 255)
-    private String imagePath;
+    // ✅ Store image as BLOB
+    @Lob
+    @Column(name = "photo", columnDefinition = "LONGBLOB")
+    private byte[] photo;
 
     @Column(name = "address", length = 100)
     private String address;

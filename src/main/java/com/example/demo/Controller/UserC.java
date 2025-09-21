@@ -8,7 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +45,7 @@ public class UserC {
                                HttpSession session,
                                Model model) {
         Optional<User> user = userService.login(username, password);
-        if (user.isPresent() && password.equals(user.get().getPassword())) {
+        if (user.isPresent()) {
             session.setAttribute("loggedInUser", user.get());
             return "redirect:/dashboardU";
         } else {
@@ -77,28 +76,15 @@ public class UserC {
     @PostMapping("/userAdd")
     public String addUser(@ModelAttribute User user,
                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
-
-        // ✅ Handle profile photo upload
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
-                File uploadPath = new File(uploadDir);
-                if (!uploadPath.exists()) uploadPath.mkdirs();
-
-                String fileName = user.getUserId() + "_" + imageFile.getOriginalFilename();
-                String filePath = uploadDir + fileName;
-
-                imageFile.transferTo(new File(filePath));
-
-                user.setImagePath("/uploads/" + fileName);
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                user.setPhoto(imageFile.getBytes()); // ✅ Save photo as BLOB
             }
-        } else {
-            // ✅ Assign default avatar if no image uploaded
-            user.setImagePath("/images/default-avatar.png");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
+        // validate & save
         if (userService.validateUser(user)) {
             userService.saveUser(user);
         }
@@ -140,24 +126,14 @@ public class UserC {
 
         updatedUser.setUserId(loggedInUser.getUserId());
 
-        // ✅ Handle image upload
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
-                File uploadPath = new File(uploadDir);
-                if (!uploadPath.exists()) uploadPath.mkdirs();
-
-                String fileName = updatedUser.getUserId() + "_" + imageFile.getOriginalFilename();
-                String filePath = uploadDir + fileName;
-
-                imageFile.transferTo(new File(filePath));
-
-                updatedUser.setImagePath("/uploads/" + fileName);
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                updatedUser.setPhoto(imageFile.getBytes()); // ✅ new photo
+            } else {
+                updatedUser.setPhoto(loggedInUser.getPhoto()); // keep old photo
             }
-        } else {
-            updatedUser.setImagePath(loggedInUser.getImagePath());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         userService.updateUser(updatedUser);
@@ -166,13 +142,19 @@ public class UserC {
         return "redirect:/dashboardU";
     }
 
+    /* ================== SERVE PHOTO ================== */
+
+    @GetMapping("/user/photo/{id}")
+    @ResponseBody
+    public byte[] getUserPhoto(@PathVariable("id") String userId) {
+        Optional<User> user = userService.findUserById(userId);
+        return user.map(User::getPhoto).orElse(null);
+    }
+
     /* ================== ADMIN FUNCTIONS ================== */
 
     @GetMapping("/userView")
     public String viewAllUsers(HttpSession session, Model model) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) return "redirect:/loginU";
-
         List<User> users = userService.getAllUsers();
         model.addAttribute("userList", users);
         return "userView";
@@ -180,9 +162,6 @@ public class UserC {
 
     @GetMapping("/userSearch")
     public String searchUsers(@RequestParam String keyword, HttpSession session, Model model) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) return "redirect:/loginU";
-
         List<User> found = userService.findUsersByKeyword(keyword);
         model.addAttribute("userList", found);
         model.addAttribute("searchKeyword", keyword);
@@ -190,10 +169,7 @@ public class UserC {
     }
 
     @GetMapping("/userEdit/{id}")
-    public String editUserForm(@PathVariable("id") String userId, HttpSession session, Model model) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) return "redirect:/loginU";
-
+    public String editUserForm(@PathVariable("id") String userId, Model model) {
         Optional<User> user = userService.findUserById(userId);
         if (user.isPresent()) {
             model.addAttribute("user", user.get());
@@ -204,10 +180,7 @@ public class UserC {
     }
 
     @PostMapping("/userUpdate")
-    public String updateUser(@ModelAttribute User user, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) return "redirect:/loginU";
-
+    public String updateUser(@ModelAttribute User user) {
         if (userService.validateUser(user)) {
             userService.updateUser(user);
         }
@@ -215,10 +188,7 @@ public class UserC {
     }
 
     @PostMapping("/userDelete/{id}")
-    public String deleteUser(@PathVariable("id") String userId, HttpSession session) {
-        User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) return "redirect:/loginU";
-
+    public String deleteUser(@PathVariable("id") String userId) {
         userService.deleteUser(userId);
         return "redirect:/userView";
     }

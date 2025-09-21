@@ -2,98 +2,119 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Admin - Reality Show</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Edit Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .card {
-            border-radius: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand text-white fw-bold" href="/admin/dashboard">Reality Show Admin</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/admin/manage">Manage Admins</a></li>
-                <li class="nav-item"><a class="nav-link" href="/episodeView">Manage Shows</a></li>
-                <li class="nav-item"><a class="nav-link" href="/voteSessionA">Manage Voting</a></li>
-                <li class="nav-item"><a class="nav-link text-danger" href="/admin/logout">Logout</a></li>
-            </ul>
-        </div>
+<div class="bg-white rounded-xl shadow-lg w-full max-w-3xl overflow-hidden">
+    <!-- Header -->
+    <div class="bg-purple-600 text-white p-6">
+        <h1 class="text-2xl font-bold flex items-center">
+            <i class="bi bi-pencil-square mr-2"></i> Edit Administrator
+        </h1>
+        <p class="text-purple-200 mt-1">Update admin account information</p>
     </div>
-</nav>
 
-<!-- Edit Admin Form -->
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg p-4">
-                <h2 class="mb-4 text-center text-indigo-600">Edit Admin</h2>
+    <!-- Form -->
+    <form th:action="@{/admin/update}" th:object="${admin}" method="post" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                <form th:action="@{/admin/update}" method="post" th:object="${admin}">
-                    <!-- Hidden ID -->
-                    <input type="hidden" th:field="*{adminID}">
+        <!-- Hidden Admin ID -->
+        <input type="hidden" th:field="*{adminID}">
 
-                    <div class="mb-3">
-                        <label class="form-label">Admin Name</label>
-                        <input type="text" th:field="*{adminName}" class="form-control" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" th:field="*{adminPassword}" class="form-control" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Role Name</label>
-                        <input type="text" th:field="*{roleName}" class="form-control">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Role ID</label>
-                        <input type="text" th:field="*{roleID}" class="form-control">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Mobile</label>
-                        <input type="text" th:field="*{mobileNumber}" class="form-control">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" th:field="*{email}" class="form-control">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <textarea th:field="*{address}" class="form-control"></textarea>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a href="/admin/manage" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i> Back
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Update Admin
-                        </button>
-                    </div>
-                </form>
+        <!-- Full Name -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-2" for="adminName">Full Name</label>
+            <div class="relative">
+                <i class="bi bi-person absolute left-3 top-3 text-gray-400"></i>
+                <input type="text" id="adminName" th:field="*{adminName}" required
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition">
             </div>
         </div>
-    </div>
+
+        <!-- Password -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-2" for="adminPassword">Password</label>
+            <div class="relative">
+                <i class="bi bi-lock absolute left-3 top-3 text-gray-400"></i>
+                <input type="password" id="adminPassword" th:field="*{adminPassword}"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+                       placeholder="Enter new password">
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Leave blank if you don’t want to change the password</p>
+        </div>
+
+        <!-- Role Name -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-2" for="roleName">Role Name</label>
+            <div class="relative">
+                <i class="bi bi-tag absolute left-3 top-3 text-gray-400"></i>
+                <input type="text" id="roleName" th:field="*{roleName}"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition">
+            </div>
+        </div>
+
+        <!-- Role ID -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-2" for="roleID">Role ID</label>
+            <div class="relative">
+                <i class="bi bi-key absolute left-3 top-3 text-gray-400"></i>
+                <input type="text" id="roleID" th:field="*{roleID}"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition">
+            </div>
+        </div>
+
+        <!-- Mobile Number -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-2" for="mobileNumber">Mobile Number</label>
+            <div class="relative">
+                <i class="bi bi-phone absolute left-3 top-3 text-gray-400"></i>
+                <input type="text" id="mobileNumber" th:field="*{mobileNumber}"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition">
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block text-gray-700 font-medium mb-2" for="email">Email Address</label>
+            <div class="relative">
+                <i class="bi bi-envelope absolute left-3 top-3 text-gray-400"></i>
+                <input type="email" id="email" th:field="*{email}"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition">
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div class="md:col-span-2">
+            <label class="block text-gray-700 font-medium mb-2" for="address">Address</label>
+            <div class="relative">
+                <i class="bi bi-geo-alt absolute left-3 top-3 text-gray-400"></i>
+                <input type="text" id="address" th:field="*{address}"
+                       class="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg
+                              focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition">
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="md:col-span-2 flex flex-col sm:flex-row gap-3 mt-2">
+            <button type="submit"
+                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+                <i class="bi bi-save mr-2"></i> Update Admin
+            </button>
+            <a th:href="@{/admin/manage}"
+               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+                <i class="bi bi-x-circle mr-2"></i> Cancel
+            </a>
+        </div>
+    </form>
 </div>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://kit.fontawesome.com/a2e0adfb58.js" crossorigin="anonymous"></script>
 </body>
 </html>

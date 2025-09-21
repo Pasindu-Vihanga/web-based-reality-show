@@ -99,13 +99,5 @@ public class AdminDAO {
         }
     }
 
-    /** ================== LOGIN CHECK (AdminName + Password) ================== */
-    public Optional<Admin> login(String adminName, String password) {
-        String sql = "SELECT * FROM admin WHERE admin_name=? AND admin_password=?";
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, adminRowMapper, adminName, password));
-        } catch (DataAccessException e) {
-            return Optional.empty();
-        }
-    }
+    // ❌ Removed the old login() method — login is now handled in AdminService with BCrypt
 }

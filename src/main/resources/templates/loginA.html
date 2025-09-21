@@ -16,9 +16,9 @@
             display: flex;
             flex-direction: column;
         }
-        .login-card { background: rgba(31, 41, 55, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .login-card { background: rgba(31, 41, 55, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .input-field { transition: all 0.3s ease; }
-        .input-field:focus { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3); }
+        .input-field:focus { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4); }
         .login-btn { position: relative; overflow: hidden; }
         .login-btn::after {
             content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
@@ -29,6 +29,8 @@
     </style>
 </head>
 <body class="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+
+<!-- Background blobs -->
 <div class="absolute inset-0 z-0 overflow-hidden">
     <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
     <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
@@ -36,26 +38,26 @@
 
 <!-- Login container -->
 <div class="flex flex-col items-center justify-center w-full max-w-md mx-auto z-10">
-    <!-- Logo -->
+    <!-- Logo & Title -->
     <div class="text-center mb-8">
         <i class="fas fa-star text-purple-500 text-4xl"></i>
         <span class="ml-2 text-3xl font-bold">Vote<span class="text-purple-500">Star</span></span>
         <h2 class="mt-6 text-2xl font-bold">Admin Portal</h2>
-        <p class="mt-2 text-gray-400">Access the reality show voting system dashboard</p>
+        <p class="mt-2 text-gray-400">Access the reality show voting dashboard</p>
     </div>
 
     <!-- Login card -->
     <div class="login-card w-full rounded-2xl p-8">
         <!-- ✅ Spring form action -->
         <form class="space-y-6" th:action="@{/admin/login}" method="post">
-
             <!-- Admin Name -->
             <div>
                 <label for="adminName" class="block text-sm font-medium text-gray-300">Admin Name</label>
                 <div class="mt-1 relative">
                     <i class="fas fa-user absolute left-3 top-3 text-gray-500"></i>
                     <input id="adminName" name="adminName" type="text" required
-                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none"
+                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 rounded-lg text-white
+                                  placeholder-gray-400 focus:outline-none"
                            placeholder="Enter admin name">
                 </div>
             </div>
@@ -66,7 +68,8 @@
                 <div class="mt-1 relative">
                     <i class="fas fa-lock absolute left-3 top-3 text-gray-500"></i>
                     <input id="adminPassword" name="adminPassword" type="password" required
-                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none"
+                           class="input-field py-3 px-4 pl-10 block w-full bg-gray-800 rounded-lg text-white
+                                  placeholder-gray-400 focus:outline-none"
                            placeholder="Enter your password">
                 </div>
             </div>
@@ -74,23 +77,25 @@
             <!-- Submit -->
             <div>
                 <button type="submit"
-                        class="login-btn w-full py-3 px-4 rounded-lg text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                        class="login-btn w-full py-3 px-4 rounded-lg text-white
+                               bg-gradient-to-r from-purple-600 to-pink-600
+                               hover:from-purple-700 hover:to-pink-700 transition">
                     <i class="fas fa-sign-in-alt mr-2"></i> Login
                 </button>
             </div>
         </form>
 
-        <!-- Error -->
-        <p th:if="${error}" th:text="${error}" class="mt-4 text-center text-red-400 font-semibold"></p>
+        <!-- Error message -->
+        <p th:if="${error}" th:text="${error}"
+           class="mt-4 text-center text-red-400 font-semibold"></p>
     </div>
 
     <!-- Back to home -->
     <div class="mt-6 text-center">
-        <a href="/" class="text-sm font-medium text-purple-500 hover:text-pink-400">
+        <a th:href="@{/}" class="text-sm font-medium text-purple-500 hover:text-pink-400">
             <i class="fas fa-arrow-left mr-1"></i> Back to home
         </a>
     </div>
 </div>
-
 </body>
 </html>

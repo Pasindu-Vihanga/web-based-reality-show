@@ -5,287 +5,153 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarFactor - Login Portal</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        :root {
-            --starfield-dark: #0a0e17;
-            --starfield-blue: #0c1d36;
-            --neon-blue: #00a8ff;
-            --neon-purple: #9d4edd;
-            --star-glow: #ffffff;
-        }
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <style>
         body {
-            font-family: 'Exo 2', sans-serif;
-            background: linear-gradient(135deg, var(--starfield-dark), var(--starfield-blue));
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0e17, #111827);
+            color: #F9FAFB;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             overflow: hidden;
-            position: relative;
         }
-
-        /* Starfield background */
+        /* Starfield Background */
         .stars {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
         }
-
         .star {
             position: absolute;
             background-color: white;
             border-radius: 50%;
             animation: twinkle linear infinite;
         }
-
         @keyframes twinkle {
             0%, 100% { opacity: 0.2; }
             50% { opacity: 1; }
         }
 
         .login-card {
-            background: rgba(13, 19, 33, 0.85);
-            padding: 2.5rem;
-            border-radius: 15px;
-            max-width: 450px;
+            background: rgba(31, 41, 55, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
             width: 100%;
-            box-shadow: 0 0 35px rgba(157, 78, 221, 0.3);
-            border: 1px solid rgba(157, 78, 221, 0.2);
-            backdrop-filter: blur(10px);
+            max-width: 420px;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        .login-btn {
             position: relative;
-            z-index: 1;
+            overflow: hidden;
+            background: linear-gradient(to right, #6366f1, #a855f7);
         }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 2.5rem;
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-            margin-bottom: 0;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            padding: 0.9rem 1.2rem;
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
-            border: 1px solid rgba(157, 78, 221, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.3);
-            color: white;
-            border-color: var(--neon-purple);
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .input-icon {
-            position: relative;
-        }
-
-        .input-icon i {
+        .login-btn::after {
+            content: '';
             position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--neon-purple);
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
         }
-
-        .btn-login {
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            border: none;
-            border-radius: 8px;
-            padding: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: 100%;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            font-family: 'Orbitron', sans-serif;
-            box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(157, 78, 221, 0.6);
-        }
-
-        .error-text {
-            color: #ff4d94;
-            text-align: center;
-            margin-top: 1rem;
-            background: rgba(255, 77, 148, 0.1);
-            padding: 0.5rem;
-            border-radius: 5px;
-            border-left: 3px solid #ff4d94;
-        }
-
-        .extra-links {
-            margin-top: 1.5rem;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .extra-links a {
-            color: var(--neon-blue);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .extra-links a:hover {
-            color: var(--neon-purple);
-            text-shadow: 0 0 8px rgba(157, 78, 221, 0.5);
-        }
-
-        .admin-reference {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .admin-reference a {
-            color: var(--neon-purple);
-            text-decoration: none;
-        }
-
-        .admin-reference a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 576px) {
-            .login-card {
-                padding: 1.5rem;
-                margin: 0 1rem;
-            }
-
-            .logo {
-                font-size: 2rem;
-            }
-        }
+        .login-btn:hover::after { left: 100%; }
     </style>
 </head>
 <body>
 
-<!-- Starfield Background -->
+<!-- Starfield -->
 <div class="stars" id="stars"></div>
 
+<!-- Login Container -->
 <div class="login-card">
-    <div class="login-header">
-        <h1 class="logo">STARFACTOR</h1>
-        <p class="subtitle">Interstellar Access Portal</p>
+    <div class="text-center mb-6">
+        <i class="fas fa-star text-purple-500 text-4xl"></i>
+        <h1 class="text-3xl font-bold mt-2">Star<span class="text-purple-500">Factor</span></h1>
+        <p class="text-gray-400 mt-1">User Access Portal</p>
     </div>
 
-    <!-- If user is already logged in -->
+    <!-- If logged in already -->
     <div th:if="${session.loggedInUser != null}" class="text-center">
-        <p>You are already logged in as
-            <strong th:text="${session.loggedInUser.username}">User</strong>.
-        </p>
-        <a th:href="@{/dashboardU}" class="btn btn-login mt-3">Go to Dashboard</a>
-        <a th:href="@{/logout}" class="btn btn-danger mt-3 w-100">Logout</a>
+        <p>You are already logged in as <strong th:text="${session.loggedInUser.username}">User</strong>.</p>
+        <a th:href="@{/dashboardU}" class="login-btn block w-full text-white py-3 rounded-lg mt-3">
+            <i class="fas fa-rocket mr-2"></i> Go to Dashboard
+        </a>
+        <a th:href="@{/logout}" class="block w-full py-3 rounded-lg mt-3 bg-red-600 hover:bg-red-700 transition text-white">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </a>
     </div>
 
-    <!-- Login Form -->
-    <form th:if="${session.loggedInUser == null}" th:action="@{/loginUser}" method="post">
-        <div class="mb-3 input-icon">
-            <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" placeholder="Enter username" required>
-            <i class="fas fa-user-astronaut"></i>
+    <!-- Login form if not logged in -->
+    <form th:if="${session.loggedInUser == null}" th:action="@{/loginUser}" method="post" class="space-y-5">
+        <!-- Username -->
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+            <div class="relative">
+                <i class="fas fa-user-astronaut absolute left-3 top-3 text-gray-500"></i>
+                <input type="text" name="username" required
+                       class="w-full pl-10 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                       placeholder="Enter username">
+            </div>
         </div>
 
-        <div class="mb-4 input-icon">
-            <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
-            <i class="fas fa-lock"></i>
+        <!-- Password -->
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <div class="relative">
+                <i class="fas fa-lock absolute left-3 top-3 text-gray-500"></i>
+                <input type="password" name="password" required
+                       class="w-full pl-10 py-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                       placeholder="Enter password">
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-login">
-            <i class="fas fa-rocket me-2"></i>Launch Login
+        <!-- Submit -->
+        <button type="submit" class="login-btn w-full py-3 rounded-lg text-white font-semibold">
+            <i class="fas fa-rocket mr-2"></i> Login
         </button>
 
-        <!-- Error message -->
-        <p th:if="${error}" th:text="${error}" class="error-text mt-3"></p>
+        <!-- Error -->
+        <p th:if="${error}" th:text="${error}" class="text-center text-red-400 font-semibold mt-3"></p>
 
         <!-- Register link -->
-        <div class="extra-links">
-            <p>New to StarFactor?
-                <a th:href="@{/registerU}">Create Stellar Account</a>
-            </p>
-        </div>
+        <p class="text-center text-sm text-gray-400 mt-4">
+            New to StarFactor?
+            <a th:href="@{/registerU}" class="text-purple-400 hover:text-pink-400">Create User Account</a>
+        </p>
 
-        <!-- Admin login reference -->
-        <div class="admin-reference">
-            <p>Administrator access? <a th:href="@{/loginA}">Login here</a></p>
-        </div>
+        <!-- Admin login -->
+        <p class="text-center text-xs text-gray-500 mt-3 border-t border-gray-700 pt-3">
+            Administrator? <a th:href="@{/loginA}" class="text-purple-400 hover:text-pink-400">Login here</a>
+        </p>
     </form>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <!-- Starfield Animation -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
         const starsContainer = document.getElementById('stars');
-        const starsCount = 150;
-
-        for (let i = 0; i < starsCount; i++) {
+        for (let i = 0; i < 150; i++) {
             const star = document.createElement('div');
             star.classList.add('star');
-
-            // Random properties for each star
             const size = Math.random() * 3;
-            const posX = Math.random() * 100;
-            const posY = Math.random() * 100;
-            const animationDuration = (Math.random() * 5) + 5;
-            const animationDelay = Math.random() * 5;
-
             star.style.width = `${size}px`;
             star.style.height = `${size}px`;
-            star.style.left = `${posX}vw`;
-            star.style.top = `${posY}vh`;
-            star.style.animationDuration = `${animationDuration}s`;
-            star.style.animationDelay = `${animationDelay}s`;
-
+            star.style.left = `${Math.random() * 100}vw`;
+            star.style.top = `${Math.random() * 100}vh`;
+            star.style.animationDuration = `${(Math.random() * 5) + 5}s`;
+            star.style.animationDelay = `${Math.random() * 5}s`;
             starsContainer.appendChild(star);
         }
     });

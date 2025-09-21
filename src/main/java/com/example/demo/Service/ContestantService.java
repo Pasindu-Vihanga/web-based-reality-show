@@ -16,52 +16,31 @@ public class ContestantService {
         this.contestantDAO = contestantDAO;
     }
 
-    /** ========== GET ALL CONTESTANTS ========== */
     public List<Contestant> getAllContestants() {
         return contestantDAO.findAll();
     }
 
-    /** ========== GET CONTESTANTS BY EPISODE ========== */
-    public List<Contestant> findByEpisodeId(String episodeId) {
-        return contestantDAO.findByEpisodeId(episodeId);
-    }
-
-    /** ========== GET CONTESTANTS BY STATUS ========== */
-    public List<Contestant> findByStatus(String status) {
-        return contestantDAO.findByStatus(status);
-    }
-
-    /** ========== FIND BY ID ========== */
     public Optional<Contestant> findContestantById(String contestantId) {
         return contestantDAO.findById(contestantId);
     }
 
-    /** ========== SAVE NEW CONTESTANT ========== */
     public void saveContestant(Contestant contestant) {
         contestantDAO.save(contestant);
     }
 
-    /** ========== UPDATE CONTESTANT ========== */
     public int updateContestant(Contestant contestant) {
         return contestantDAO.update(contestant);
     }
 
-    /** ========== DELETE CONTESTANT ========== */
     public int deleteContestant(String contestantId) {
         return contestantDAO.delete(contestantId);
     }
 
-    /** ========== VALIDATION LOGIC ========== */
+    /** ✅ Validation */
     public boolean validateContestant(Contestant contestant) {
-        if (contestant.getName() == null || contestant.getName().isBlank()) {
-            return false; // Must have a name
-        }
-        if (contestant.getStatus() == null || contestant.getStatus().isBlank()) {
-            return false; // Must have status
-        }
-        if (contestant.getShow() == null || contestant.getShow().getEpisodeId() == null) {
-            return false; // Must be linked to a show/episode
-        }
+        if (contestant.getName() == null || contestant.getName().isBlank()) return false;
+        if (contestant.getStatus() == null || contestant.getStatus().isBlank()) return false;
+        if (contestant.getShow() == null || contestant.getShow().getEpisodeId() == null) return false;
         return true;
     }
 }

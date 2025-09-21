@@ -1,15 +1,13 @@
 package com.example.demo.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -36,4 +34,11 @@ public class Show {
 
     @Column(name = "show_time")
     private LocalTime showTime;
+
+    @Column(name = "status")
+    private String status;
+
+    // 🔗 Linked voting sessions
+    @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Vote> sessions;
 }

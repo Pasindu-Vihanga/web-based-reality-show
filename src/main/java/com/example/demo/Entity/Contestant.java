@@ -1,4 +1,5 @@
 package com.example.demo.Entity;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,16 +22,14 @@ public class Contestant {
         @Column(name = "bio", length = 1000)
         private String bio;
 
-        @Column(name = "image_url")
-        private String imageUrl;
+        @Lob
+        @Column(name = "image", columnDefinition = "LONGBLOB")
+        private byte[] image;   // ✅ Store image as byte[]
 
         @Column(name = "status", nullable = false)
         private String status;
-        // Example values: "active", "eliminated"
 
         @ManyToOne
         @JoinColumn(name = "episode_id", nullable = false)
         private Show show;
-        // Each contestant is linked to a Show/Episode
 }
-

@@ -9,8 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
-import java.sql.Time;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,67 +18,62 @@ public class ContestantDAO {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Contestant> contestantRowMapper = new RowMapper<>() {
-        @Override
-        public Contestant mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Show show = new Show();
-            show.setEpisodeId(rs.getString("episode_id"));
-            show.setShowTitle(rs.getString("show_title"));
-            show.setShowDescription(rs.getString("show_description"));
-            show.setShowType(rs.getString("show_type"));
-            if (rs.getDate("show_date") != null) {
-                show.setShowDate(rs.getDate("show_date").toLocalDate());
-            }
-            if (rs.getTime("show_time") != null) {
-                show.setShowTime(rs.getTime("show_time").toLocalTime());
-            }
-
-            return new Contestant(
-                    rs.getString("contestant_id"),
-                    rs.getString("name"),
-                    rs.getString("bio"),
-                    rs.getString("image_url"),
-                    rs.getString("status"),
-                    show
-            );
+    private final RowMapper<Contestant> contestantRowMapper = (rs, rowNum) -> {
+        Show show = new Show();
+        show.setEpisodeId(rs.getString("episode_id"));
+        show.setShowTitle(rs.getString("show_title"));
+        show.setShowDescription(rs.getString("show_description"));
+        show.setShowType(rs.getString("show_type"));
+        if (rs.getDate("show_date") != null) {
+            show.setShowDate(rs.getDate("show_date").toLocalDate());
         }
+        if (rs.getTime("show_time") != null) {
+            show.setShowTime(rs.getTime("show_time").toLocalTime());
+        }
+
+        return new Contestant(
+                rs.getString("contestant_id"),
+                rs.getString("name"),
+                rs.getString("bio"),
+                rs.getBytes("image"),   // ✅ fetch LONGBLOB
+                rs.getString("status"),
+                show
+        );
     };
 
-    /** ========== SAVE NEW CONTESTANT ========== */
+    /** ========== SAVE ========== */
     public void save(Contestant contestant) {
-        String sql = "INSERT INTO contestant (contestant_id, name, bio, image_url, status, episode_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO contestant (contestant_id, name, bio, image, status, episode_id) VALUES (?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 contestant.getContestantId(),
                 contestant.getName(),
                 contestant.getBio(),
-                contestant.getImageUrl(),
+                contestant.getImage(),
                 contestant.getStatus(),
                 contestant.getShow().getEpisodeId()
         );
     }
 
-    /** ========== UPDATE CONTESTANT ========== */
+    /** ========== UPDATE ========== */
     public int update(Contestant contestant) {
-        String sql = "UPDATE contestant SET name = ?, bio = ?, image_url = ?, status = ?, episode_id = ? " +
-                "WHERE contestant_id = ?";
+        String sql = "UPDATE contestant SET name=?, bio=?, image=?, status=?, episode_id=? WHERE contestant_id=?";
         return jdbcTemplate.update(sql,
                 contestant.getName(),
                 contestant.getBio(),
-                contestant.getImageUrl(),
+                contestant.getImage(),
                 contestant.getStatus(),
                 contestant.getShow().getEpisodeId(),
                 contestant.getContestantId()
         );
     }
 
-    /** ========== DELETE CONTESTANT ========== */
+    /** ========== DELETE ========== */
     public int delete(String contestantId) {
-        String sql = "DELETE FROM contestant WHERE contestant_id = ?";
+        String sql = "DELETE FROM contestant WHERE contestant_id=?";
         return jdbcTemplate.update(sql, contestantId);
     }
 
-    /** ========== FIND ALL CONTESTANTS ========== */
+    /** ========== FIND ALL ========== */
     public List<Contestant> findAll() {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time
@@ -90,35 +83,13 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper);
     }
 
-    /** ========== FIND BY EPISODE ========== */
-    public List<Contestant> findByEpisodeId(String episodeId) {
-        String sql = """
-            SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time
-            FROM contestant c
-            JOIN showepi s ON c.episode_id = s.episode_id
-            WHERE c.episode_id = ?
-            """;
-        return jdbcTemplate.query(sql, contestantRowMapper, episodeId);
-    }
-
-    /** ========== FIND BY STATUS ========== */
-    public List<Contestant> findByStatus(String status) {
-        String sql = """
-            SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time
-            FROM contestant c
-            JOIN showepi s ON c.episode_id = s.episode_id
-            WHERE c.status = ?
-            """;
-        return jdbcTemplate.query(sql, contestantRowMapper, status);
-    }
-
     /** ========== FIND BY ID ========== */
     public Optional<Contestant> findById(String contestantId) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time
             FROM contestant c
             JOIN showepi s ON c.episode_id = s.episode_id
-            WHERE c.contestant_id = ?
+            WHERE c.contestant_id=?
             """;
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, contestantRowMapper, contestantId));

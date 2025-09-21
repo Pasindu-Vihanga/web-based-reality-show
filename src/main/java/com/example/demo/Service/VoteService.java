@@ -16,44 +16,56 @@ public class VoteService {
         this.voteDAO = voteDAO;
     }
 
-    /** ========== GET ALL SESSIONS ========== */
+    /** ================= GET ALL SESSIONS ================= */
     public List<Vote> getAllSessions() {
         return voteDAO.findAll();
     }
 
-    /** ========== GET ACTIVE SESSIONS ========== */
+    /** ================= GET ACTIVE SESSIONS ================= */
     public List<Vote> getActiveSessions() {
         return voteDAO.findAll().stream()
                 .filter(Vote::isActive)
                 .toList();
     }
 
-    /** ========== FIND BY ID ========== */
+    /** ================= FIND BY ID ================= */
     public Optional<Vote> findSessionById(String sessionId) {
         return voteDAO.findById(sessionId);
     }
 
-    /** ========== FIND BY EPISODE ID ========== */
+    /** ================= FIND BY EPISODE ================= */
     public List<Vote> findSessionsByEpisode(String episodeId) {
         return voteDAO.findByEpisodeId(episodeId);
     }
 
-    /** ========== SAVE ========== */
+    /** ================= SAVE ================= */
     public void saveSession(Vote session) {
+        if (session.getCurrentVotes() < 0) {
+            session.setCurrentVotes(0);
+        }
+        if (session.getStatus() == null || session.getStatus().isBlank()) {
+            session.setStatus("Scheduled"); // Default status
+        }
         voteDAO.save(session);
     }
 
-    /** ========== UPDATE ========== */
+    /** ================= UPDATE ================= */
     public int updateSession(Vote session) {
+        if (session.getCurrentVotes() < 0) {
+            session.setCurrentVotes(0);
+        }
+        if (session.getStatus() == null || session.getStatus().isBlank()) {
+            session.setStatus(session.isActive() ? "Live" : "Paused");
+        }
         return voteDAO.update(session);
     }
 
-    /** ========== DELETE ========== */
+    /** ================= DELETE ================= */
     public int deleteSession(String sessionId) {
         return voteDAO.delete(sessionId);
     }
 
-    /** ========== VALIDATION LOGIC ========== */
+    /** ================= VALIDATION ================= */
     public boolean validateSession(Vote session) {
         if (session.getStartTime() == null || session.getEndTime() == null) {
             return false;
@@ -62,5 +74,19 @@ public class VoteService {
             return false;
         }
         return session.getMaxVotesPerUser() > 0;
+    }
+
+    /** ================= CAST VOTE ================= */
+    public boolean castVote(String sessionId) {
+        Optional<Vote> sessionOpt = findSessionById(sessionId);
+        if (sessionOpt.isPresent()) {
+            Vote session = sessionOpt.get();
+            if (!session.isActive()) return false;
+
+            session.setCurrentVotes(session.getCurrentVotes() + 1);
+            updateSession(session);
+            return true;
+        }
+        return false;
     }
 }

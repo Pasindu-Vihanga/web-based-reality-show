@@ -8,6 +8,7 @@ import com.example.demo.Service.ResultService;
 import com.example.demo.Service.VoteService;
 import com.example.demo.Service.ContestantService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,18 +30,15 @@ public class ResultC {
         this.contestantService = contestantService;
     }
 
-    /** ========== VIEW ALL RESULTS (ADMIN) ========== */
+    /** ================== ADMIN: VIEW ALL ================== */
     @GetMapping("/resultsA")
     public String viewAllResultsAdmin(Model model, HttpSession session) {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) {
-            return "redirect:/loginA"; // only admins allowed
-        }
+        if (loggedInAdmin == null) return "redirect:/loginA";
 
         List<Result> results = resultService.getAllResults();
         model.addAttribute("resultList", results);
 
-        // For dropdowns in Add form
         model.addAttribute("sessionList", voteService.getAllSessions());
         model.addAttribute("contestantList", contestantService.getAllContestants());
         model.addAttribute("newResult", new Result());
@@ -48,42 +46,37 @@ public class ResultC {
         return "resultsA";
     }
 
-    /** ========== VIEW ACTIVE SESSION RESULTS (USER) ========== */
+    /** ================== USER: VIEW ACTIVE SESSION RESULTS ================== */
     @GetMapping("/resultsU")
     public String viewActiveResults(HttpSession session, Model model) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
-        if (loggedInUser == null) {
-            return "redirect:/loginU"; // only logged-in users
-        }
+        if (loggedInUser == null) return "redirect:/loginU";
 
-        // Get active sessions
         List<Vote> activeSessions = voteService.getActiveSessions();
         if (activeSessions.isEmpty()) {
             model.addAttribute("message", "No active results available.");
             return "resultsU";
         }
 
-        // Pick latest session
         Vote latestSession = activeSessions.stream()
                 .max(Comparator.comparing(Vote::getStartTime))
                 .orElse(null);
 
         if (latestSession != null) {
             model.addAttribute("resultList", resultService.findBySessionId(latestSession.getSessionId()));
+            model.addAttribute("totalVotes", resultService.countVotesBySession(latestSession.getSessionId()));
         } else {
-            model.addAttribute("message", "No results available for active sessions.");
+            model.addAttribute("message", "No results available.");
         }
 
         return "resultsU";
     }
 
-    /** ========== ADD NEW RESULT (ADMIN) ========== */
+    /** ================== ADD NEW RESULT ================== */
     @PostMapping("/result/add")
     public String addResult(@ModelAttribute Result result, HttpSession session) {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) {
-            return "redirect:/loginA";
-        }
+        if (loggedInAdmin == null) return "redirect:/loginA";
 
         if (resultService.validateResult(result)) {
             resultService.saveResult(result);
@@ -91,13 +84,11 @@ public class ResultC {
         return "redirect:/resultsA";
     }
 
-    /** ========== EDIT RESULT FORM (ADMIN) ========== */
+    /** ================== EDIT RESULT FORM ================== */
     @GetMapping("/result/edit/{id}")
     public String editResultForm(@PathVariable("id") Long resultId, Model model, HttpSession session) {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) {
-            return "redirect:/loginA";
-        }
+        if (loggedInAdmin == null) return "redirect:/loginA";
 
         Optional<Result> result = resultService.findById(resultId);
         if (result.isPresent()) {
@@ -105,18 +96,15 @@ public class ResultC {
             model.addAttribute("sessionList", voteService.getAllSessions());
             model.addAttribute("contestantList", contestantService.getAllContestants());
             return "editResult";
-        } else {
-            return "redirect:/resultsA";
         }
+        return "redirect:/resultsA";
     }
 
-    /** ========== UPDATE RESULT (ADMIN) ========== */
+    /** ================== UPDATE RESULT ================== */
     @PostMapping("/result/update")
     public String updateResult(@ModelAttribute Result result, HttpSession session) {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) {
-            return "redirect:/loginA";
-        }
+        if (loggedInAdmin == null) return "redirect:/loginA";
 
         if (resultService.validateResult(result)) {
             resultService.updateResult(result);
@@ -124,15 +112,34 @@ public class ResultC {
         return "redirect:/resultsA";
     }
 
-    /** ========== DELETE RESULT (ADMIN) ========== */
+    /** ================== DELETE RESULT ================== */
     @PostMapping("/result/delete/{id}")
     public String deleteResult(@PathVariable("id") Long resultId, HttpSession session) {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) {
-            return "redirect:/loginA";
-        }
+        if (loggedInAdmin == null) return "redirect:/loginA";
 
         resultService.deleteResult(resultId);
         return "redirect:/resultsA";
+    }
+
+    /** ================== REST ENDPOINTS FOR RANKINGS ================== */
+
+    @GetMapping("/api/results/rankings/{sessionId}")
+    @ResponseBody
+    public ResponseEntity<List<Result>> getRankings(@PathVariable String sessionId) {
+        return ResponseEntity.ok(resultService.getRankings(sessionId));
+    }
+
+    @GetMapping("/api/results/totalVotes/{sessionId}")
+    @ResponseBody
+    public ResponseEntity<Integer> getTotalVotes(@PathVariable String sessionId) {
+        return ResponseEntity.ok(resultService.countVotesBySession(sessionId));
+    }
+
+    @PostMapping("/api/results/clean")
+    @ResponseBody
+    public ResponseEntity<String> cleanResults() {
+        int removed = resultService.cleanInvalidResults();
+        return ResponseEntity.ok(removed + " invalid results removed.");
     }
 }

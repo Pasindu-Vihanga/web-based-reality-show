@@ -16,18 +16,24 @@ public class ShowService {
         this.showDAO = showDAO;
     }
 
-    /** ========== SAVE SHOW ========== */
+    /** ========== SAVE NEW SHOW ========== */
     public void saveShow(Show show) {
         if (validateShow(show)) {
+            if (show.getStatus() == null || show.getStatus().isBlank()) {
+                show.setStatus("UPCOMING"); // ✅ Default status
+            }
             showDAO.save(show);
         } else {
-            throw new IllegalArgumentException("Invalid show details provided");
+            throw new IllegalArgumentException("Invalid Show details!");
         }
     }
 
     /** ========== UPDATE SHOW ========== */
     public int updateShow(Show show) {
         if (validateShow(show)) {
+            if (show.getStatus() == null || show.getStatus().isBlank()) {
+                show.setStatus("UPCOMING");
+            }
             return showDAO.update(show);
         }
         return 0;
@@ -35,7 +41,7 @@ public class ShowService {
 
     /** ========== DELETE SHOW ========== */
     public void deleteShow(String episodeId) {
-        if (episodeId != null && !episodeId.trim().isEmpty()) {
+        if (episodeId != null && !episodeId.isBlank()) {
             showDAO.delete(episodeId);
         }
     }
@@ -47,32 +53,25 @@ public class ShowService {
 
     /** ========== SEARCH SHOWS BY TITLE ========== */
     public List<Show> findShowsByTitle(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            return List.of(); // return empty list instead of querying with null
+        if (title == null || title.isBlank()) {
+            return List.of();
         }
         return showDAO.findByTitle(title);
     }
 
-    /** ========== FIND BY ID ========== */
+    /** ========== FIND SHOW BY ID ========== */
     public Optional<Show> findShowById(String episodeId) {
-        if (episodeId == null || episodeId.trim().isEmpty()) {
+        if (episodeId == null || episodeId.isBlank()) {
             return Optional.empty();
         }
         return showDAO.findById(episodeId);
     }
 
-    /** ========== CHECK IF SHOW EXISTS ========== */
-    public boolean showExists(String episodeId) {
-        return findShowById(episodeId).isPresent();
-    }
-
-    /** ========== VALIDATION ========== */
+    /** ========== VALIDATE SHOW ========== */
     public boolean validateShow(Show show) {
-        if (show == null) return false;
-        if (show.getEpisodeId() == null || show.getEpisodeId().trim().isEmpty()) return false;
-        if (show.getShowTitle() == null || show.getShowTitle().trim().isEmpty()) return false;
-        if (show.getShowDate() == null) return false; // show date is mandatory
-        // time can be optional (live shows might not have fixed time yet)
-        return true;
+        return show != null
+                && show.getEpisodeId() != null && !show.getEpisodeId().isBlank()
+                && show.getShowTitle() != null && !show.getShowTitle().isBlank()
+                && show.getShowDate() != null; // ✅ showDate is mandatory
     }
 }

@@ -18,7 +18,9 @@
       </a>
     </div>
     <div class="card-body">
-      <form th:action="@{/contestant/update}" th:object="${contestant}" method="post">
+      <!-- ✅ multipart enabled -->
+      <form th:action="@{/contestant/update}" th:object="${contestant}" method="post" enctype="multipart/form-data">
+
         <!-- Hidden ID -->
         <input type="hidden" th:field="*{contestantId}"/>
 
@@ -34,12 +36,14 @@
           <textarea th:field="*{bio}" class="form-control" rows="3"></textarea>
         </div>
 
-        <!-- Image URL -->
+        <!-- Image Upload -->
         <div class="mb-3">
-          <label class="form-label">Image URL</label>
-          <input type="text" th:field="*{imageUrl}" class="form-control">
+          <label class="form-label">Contestant Image</label>
+          <input type="file" name="imageFile" class="form-control" accept="image/*">
           <div class="mt-2">
-            <img th:if="*{imageUrl}" th:src="@{*{imageUrl}}" class="img-thumbnail" style="max-width:150px;">
+            <!-- ✅ Display existing image -->
+            <img th:if="*{contestantId}" th:src="@{'/contestant/image/' + *{contestantId}}"
+                 class="img-thumbnail" style="max-width:150px;">
           </div>
         </div>
 

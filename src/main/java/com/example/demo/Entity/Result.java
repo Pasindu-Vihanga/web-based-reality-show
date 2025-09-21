@@ -19,19 +19,19 @@ public class Result {
 
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
-    private Vote votingSession;   // Voting session linked
+    private Vote votingSession;
 
     @ManyToOne
     @JoinColumn(name = "contestant_id", nullable = false)
-    private Contestant contestant;  // Contestant being voted for
+    private Contestant contestant;
 
     @Column(name = "votes_count", nullable = false)
-    private int votesCount;  // Number of votes received
+    private int votesCount;
 
     @Column(name = "place")
-    private Integer place;   // Placement (1 = winner, 2 = runner-up, etc.)
+    private Integer place;
 
     @Column(name = "status", nullable = false)
     private String status;
-    // Example values: "winner", "eliminated", "safe"
+    // Values: draft, final, public
 }

@@ -43,7 +43,7 @@ public class AdminC {
         return "loginA";
     }
 
-    /** ========== PROCESS LOGIN ========== */
+    /** ========== PROCESS LOGIN (Admin Name + Password) ========== */
     @PostMapping("/admin/login")
     public String processLogin(@RequestParam String adminName,
                                @RequestParam String adminPassword,
@@ -55,7 +55,7 @@ public class AdminC {
             session.setAttribute("loggedInAdmin", adminOpt.get());
             return "redirect:/admin/dashboard";
         } else {
-            model.addAttribute("error", "Invalid Admin credentials!");
+            model.addAttribute("error", "Invalid Admin Name or password!");
             return "loginA";
         }
     }
@@ -96,7 +96,12 @@ public class AdminC {
         List<Admin> adminList = adminService.getAllAdmins();
         model.addAttribute("adminList", adminList);
         model.addAttribute("newAdmin", new Admin());
-        return "adminManage"; // Thymeleaf template
+
+        // Stats for Thymeleaf dashboard
+        model.addAttribute("roleCount", adminService.countRoles());
+        model.addAttribute("lastAddedAdmin", adminService.getLastAddedAdmin().orElse(null));
+
+        return "adminManage";
     }
 
     /** ========== ADD ADMIN ========== */
@@ -107,7 +112,6 @@ public class AdminC {
             return "redirect:/loginA";
         }
 
-        // ✅ ID will be auto-generated in DAO via AdminIDGenerator
         adminService.saveAdmin(admin);
         return "redirect:/admin/manage";
     }

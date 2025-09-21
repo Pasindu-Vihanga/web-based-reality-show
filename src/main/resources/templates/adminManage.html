@@ -59,7 +59,7 @@
 
     <!-- Table -->
     <div class="card shadow mb-5">
-        <div class="card-header d-flex justify-content-between">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">All Admins</h5>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
                 <i class="fas fa-plus"></i> Add Admin
@@ -79,7 +79,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="a : ${adminList}">
-                    <td th:text="${a.adminID}">A001</td>
+                    <td th:text="${a.adminID}">ADM000001</td>
                     <td th:text="${a.adminName}">Admin Name</td>
                     <td th:text="${a.roleName}">Role</td>
                     <td th:text="${a.email}">admin@mail.com</td>
@@ -114,8 +114,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <label class="form-label">Admin ID</label>
-                    <input type="text" th:field="*{adminID}" class="form-control mb-2" required>
+                    <!-- Admin ID is auto-generated -->
+                    <p class="text-muted small">Admin ID will be generated automatically</p>
 
                     <label class="form-label">Admin Name</label>
                     <input type="text" th:field="*{adminName}" class="form-control mb-2" required>

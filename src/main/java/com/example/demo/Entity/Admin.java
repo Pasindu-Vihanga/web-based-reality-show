@@ -2,11 +2,13 @@ package com.example.demo.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +19,7 @@ public class Admin {
 
     @Id
     @Column(name = "adminid", nullable = false, unique = true, length = 9)
-    private String adminID;   // e.g., ADM000001 (generated in DAO via AdminIDGenerator)
+    private String adminID;   // e.g., ADM000001 (auto-generated)
 
     @Column(name = "admin_name", nullable = false, length = 50)
     private String adminName;

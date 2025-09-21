@@ -2,72 +2,32 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Contestant Management - Admin</title>
+    <title>Contestants Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background: #f9fafb; }
-        .card { border-radius: 12px; transition: transform .2s; }
-        .card:hover { transform: translateY(-4px); }
-        .contestant-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; }
-    </style>
 </head>
 <body>
 <div class="container mt-4">
-    <h2 class="text-center text-primary fw-bold mb-4">Manage Contestants</h2>
+    <h2 class="fw-bold text-primary">Contestants Management</h2>
 
-    <!-- Add New Contestant -->
-    <div class="card p-4 mb-4 shadow-sm">
-        <h5 class="mb-3">Add New Contestant</h5>
-        <form th:action="@{/contestant/add}" method="post" enctype="multipart/form-data">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="name" class="form-control" placeholder="Name" required>
-                </div>
-                <div class="col-md-4">
-                    <select name="status" class="form-select" required>
-                        <option value="active">Active</option>
-                        <option value="eliminated">Eliminated</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select name="show.episodeId" class="form-select" required>
-                        <option th:each="ep : ${episodeList}"
-                                th:value="${ep.episodeId}"
-                                th:text="${ep.showTitle}"></option>
-                    </select>
-                </div>
-                <div class="col-md-8">
-                    <textarea name="bio" class="form-control" placeholder="Short bio..."></textarea>
-                </div>
-                <div class="col-md-4">
-                    <input type="file" name="imageFile" class="form-control" accept="image/*" required>
-                </div>
-                <div class="col-md-12 text-end">
-                    <button type="submit" class="btn btn-success">Add Contestant</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <!-- Contestant Table -->
-    <div class="row g-4">
-        <div class="col-md-4" th:each="c : ${contestantList}">
-            <div class="card shadow p-3 h-100">
-                <img th:src="@{'/contestant/image/' + ${c.contestantId}}" class="contestant-img mb-3" alt="Contestant Image">
-                <h5 th:text="${c.name}">Name</h5>
-                <p th:text="${c.bio}">Bio...</p>
-                <p><strong>Status:</strong> <span th:text="${c.status}"></span></p>
-                <p><strong>Show:</strong> <span th:text="${c.show.showTitle}"></span></p>
-                <div class="d-flex justify-content-between">
-                    <a th:href="@{/contestant/edit/{id}(id=${c.contestantId})}" class="btn btn-warning btn-sm">Edit</a>
-                    <form th:action="@{/contestant/delete/{id}(id=${c.contestantId})}" method="post">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Contestants Table -->
+    <table class="table table-striped shadow">
+        <thead class="table-dark"><tr><th>Image</th><th>Name</th><th>Bio</th><th>Status</th><th>Episode</th><th>Actions</th></tr></thead>
+        <tbody>
+        <tr th:each="c : ${contestantList}">
+            <td><img th:if="${c.image != null}" th:src="@{'/contestant/image/' + ${c.contestantId}}" class="img-thumbnail" style="max-width:80px"></td>
+            <td th:text="${c.name}"></td>
+            <td th:text="${c.bio}"></td>
+            <td th:text="${c.status}"></td>
+            <td th:text="${c.show.showTitle}"></td>
+            <td>
+                <a th:href="@{/contestant/edit/{id}(id=${c.contestantId})}" class="btn btn-sm btn-warning">Edit</a>
+                <form th:action="@{/contestant/delete/{id}(id=${c.contestantId})}" method="post" class="d-inline">
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

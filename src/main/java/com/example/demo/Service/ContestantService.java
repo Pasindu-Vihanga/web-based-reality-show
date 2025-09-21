@@ -3,6 +3,7 @@ package com.example.demo.Service;
 import com.example.demo.DAO.ContestantDAO;
 import com.example.demo.Entity.Contestant;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,27 +21,47 @@ public class ContestantService {
         return contestantDAO.findAll();
     }
 
+    public List<Contestant> findByEpisodeId(String episodeId) {
+        return contestantDAO.findByEpisodeId(episodeId);
+    }
+
+    public List<Contestant> findByStatus(String status) {
+        return contestantDAO.findByStatus(status);
+    }
+
+    /** ✅ Fix: method renamed to match controller */
     public Optional<Contestant> findContestantById(String contestantId) {
         return contestantDAO.findById(contestantId);
     }
 
+    @Transactional
     public void saveContestant(Contestant contestant) {
-        contestantDAO.save(contestant);
+        if (validateContestant(contestant)) {
+            contestantDAO.save(contestant);
+        } else {
+            throw new IllegalArgumentException("Invalid contestant data");
+        }
     }
 
+    @Transactional
     public int updateContestant(Contestant contestant) {
-        return contestantDAO.update(contestant);
+        if (validateContestant(contestant)) {
+            return contestantDAO.update(contestant);
+        }
+        throw new IllegalArgumentException("Invalid contestant data");
     }
 
+    @Transactional
     public int deleteContestant(String contestantId) {
         return contestantDAO.delete(contestantId);
     }
 
-    /** ✅ Validation */
     public boolean validateContestant(Contestant contestant) {
-        if (contestant.getName() == null || contestant.getName().isBlank()) return false;
-        if (contestant.getStatus() == null || contestant.getStatus().isBlank()) return false;
-        if (contestant.getShow() == null || contestant.getShow().getEpisodeId() == null) return false;
-        return true;
+        return contestant != null &&
+                contestant.getName() != null && !contestant.getName().isBlank() &&
+                contestant.getStatus() != null && !contestant.getStatus().isBlank() &&
+                contestant.getShow() != null &&
+                contestant.getShow().getEpisodeId() != null &&
+                !contestant.getShow().getEpisodeId().isBlank();
     }
 }

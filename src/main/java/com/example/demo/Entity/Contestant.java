@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,12 +26,17 @@ public class Contestant {
 
         @Lob
         @Column(name = "image", columnDefinition = "LONGBLOB")
-        private byte[] image;   // ✅ Store image as byte[]
+        private byte[] image;
 
         @Column(name = "status", nullable = false)
-        private String status;
+        private String status; // "active", "eliminated"
 
+        /** 🔗 Each contestant belongs to one Episode */
         @ManyToOne
         @JoinColumn(name = "episode_id", nullable = false)
         private Show show;
+
+        /** 🔗 Contestant can appear in multiple Results (votes across sessions) */
+        @OneToMany(mappedBy = "contestant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+        private List<Result> results;
 }

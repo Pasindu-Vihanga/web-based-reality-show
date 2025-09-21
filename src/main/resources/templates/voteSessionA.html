@@ -2,39 +2,46 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Voting Sessions - Admin</title>
+    <title>Voting Sessions</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-4">
-    <h2 class="text-center text-primary fw-bold mb-4">Voting Session Management</h2>
+    <h2 class="fw-bold text-primary">Voting Sessions</h2>
+
+    <!-- Add Session -->
+    <form th:action="@{/session/add}" th:object="${newSession}" method="post" class="row g-3 mb-3">
+        <div class="col-md-3">
+            <select th:field="*{show.episodeId}" class="form-select" required>
+                <option th:each="ep : ${episodeList}" th:value="${ep.episodeId}" th:text="${ep.showTitle}"></option>
+            </select>
+        </div>
+        <div class="col-md-3"><input th:field="*{startTime}" type="datetime-local" class="form-control" required></div>
+        <div class="col-md-3"><input th:field="*{endTime}" type="datetime-local" class="form-control" required></div>
+        <div class="col-md-2"><input th:field="*{maxVotesPerUser}" type="number" class="form-control" min="1" required></div>
+        <div class="col-md-1"><button class="btn btn-success w-100">Add</button></div>
+    </form>
 
     <!-- Sessions Table -->
-    <table class="table table-striped">
-        <thead><tr><th>Episode</th><th>Start</th><th>End</th><th>Status</th><th>Votes</th><th>Actions</th></tr></thead>
+    <table class="table table-bordered shadow-sm">
+        <thead class="table-dark"><tr><th>Episode</th><th>Start</th><th>End</th><th>Status</th><th>Votes/User</th><th>Actions</th></tr></thead>
         <tbody>
         <tr th:each="s : ${sessionList}">
-            <td th:text="${s.show.showTitle}">Episode</td>
-            <td th:text="${s.startTime}">Start</td>
-            <td th:text="${s.endTime}">End</td>
-            <td><span class="badge" th:classappend="${s.active} ? 'bg-success':'bg-secondary'"
-                      th:text="${s.status}">Live</span></td>
-            <td th:text="${s.currentVotes}">0</td>
+            <td th:text="${s.show.showTitle}"></td>
+            <td th:text="${s.startTime}"></td>
+            <td th:text="${s.endTime}"></td>
             <td>
-                <form th:action="@{'/session/delete/' + ${s.sessionId}}" method="post" class="d-inline">
-                    <button class="btn btn-danger btn-sm">Delete</button>
+                <span th:text="${s.active ? 'Active' : 'Inactive'}"></span>
+            </td>
+            <td th:text="${s.maxVotesPerUser}"></td>
+            <td>
+                <form th:action="@{/session/delete/{id}(id=${s.sessionId})}" method="post" class="d-inline">
+                    <button class="btn btn-sm btn-danger">Delete</button>
                 </form>
-                <button class="btn btn-warning btn-sm" th:onclick="'toggleSession(' + ${s.sessionId} + ')'">Toggle</button>
             </td>
         </tr>
         </tbody>
     </table>
 </div>
-<script>
-    function toggleSession(id) {
-        fetch('/api/votes/toggle/' + id, { method: 'POST' })
-            .then(() => location.reload());
-    }
-</script>
 </body>
 </html>

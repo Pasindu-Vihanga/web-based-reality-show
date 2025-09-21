@@ -1,7 +1,9 @@
 package com.example.demo.Service;
 
 import com.example.demo.DAO.ResultDAO;
+import com.example.demo.Entity.Contestant;
 import com.example.demo.Entity.Result;
+import com.example.demo.Entity.Vote;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,13 +18,18 @@ public class ResultService {
         this.resultDAO = resultDAO;
     }
 
-    /** ================== CRUD ================== */
+    /** ================= CRUD ================= */
     public void saveResult(Result result) {
-        resultDAO.save(result);
+        if (validateResult(result)) {
+            resultDAO.save(result);
+        }
     }
 
     public int updateResult(Result result) {
-        return resultDAO.update(result);
+        if (validateResult(result)) {
+            return resultDAO.update(result);
+        }
+        return 0;
     }
 
     public int deleteResult(Long resultId) {
@@ -33,25 +40,15 @@ public class ResultService {
         return resultDAO.findAll();
     }
 
-    public List<Result> findBySessionId(String sessionId) {
-        return resultDAO.findBySessionId(sessionId);
-    }
-
     public Optional<Result> findById(Long resultId) {
         return resultDAO.findById(resultId);
     }
 
-    /** ================== VALIDATION ================== */
-    public boolean validateResult(Result result) {
-        if (result.getVotingSession() == null || result.getVotingSession().getSessionId() == null) return false;
-        if (result.getContestant() == null || result.getContestant().getContestantId() == null) return false;
-        if (result.getVotesCount() < 0) return false;
-        if (result.getPlace() != null && result.getPlace() <= 0) return false;
-        if (result.getStatus() == null || result.getStatus().isBlank()) return false;
-        return true;
+    /** ================= QUERY HELPERS ================= */
+    public List<Result> findBySessionId(String sessionId) {
+        return resultDAO.findBySessionId(sessionId);
     }
 
-    /** ================== EXTRA FEATURES ================== */
     public int countVotesBySession(String sessionId) {
         return resultDAO.countVotesBySession(sessionId);
     }
@@ -60,7 +57,45 @@ public class ResultService {
         return resultDAO.getRankings(sessionId);
     }
 
-    public int cleanInvalidResults() {
+    /** ================= MAINTENANCE ================= */
+    public int removeInvalidResults() {
         return resultDAO.removeInvalidResults();
+    }
+
+    /** ================= VALIDATION ================= */
+    public boolean validateResult(Result result) {
+        return result != null &&
+                result.getVotingSession() != null &&
+                result.getVotingSession().getSessionId() != null &&
+                result.getContestant() != null &&
+                result.getContestant().getContestantId() != null &&
+                result.getVotesCount() >= 0 &&
+                (result.getPlace() == null || result.getPlace() > 0) &&
+                result.getStatus() != null && !result.getStatus().isBlank();
+    }
+
+    /** ================= CAST VOTE ================= */
+    public void castVote(String sessionId, Contestant contestant) {
+        // Check if this contestant already has a result row in this session
+        List<Result> results = resultDAO.findBySessionId(sessionId);
+        Optional<Result> existing = results.stream()
+                .filter(r -> r.getContestant().getContestantId().equals(contestant.getContestantId()))
+                .findFirst();
+
+        if (existing.isPresent()) {
+            // Increment vote count
+            Result result = existing.get();
+            result.setVotesCount(result.getVotesCount() + 1);
+            resultDAO.update(result);
+        } else {
+            // Create new result row
+            Result newResult = new Result();
+            newResult.setVotingSession(new Vote(sessionId, null, null, null, true, 1, null));
+            newResult.setContestant(contestant);
+            newResult.setVotesCount(1);
+            newResult.setPlace(null);
+            newResult.setStatus("safe"); // default until processed
+            resultDAO.save(newResult);
+        }
     }
 }

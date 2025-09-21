@@ -38,7 +38,11 @@ public class Show {
     @Column(name = "status")
     private String status;
 
-    // 🔗 Linked voting sessions
+    /** 🔗 One Episode has many Voting Sessions */
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Vote> sessions;
+
+    /** 🔗 One Episode has many Contestants */
+    @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Contestant> contestants;
 }

@@ -17,10 +17,12 @@ public class Result {
     @Column(name = "result_id")
     private Long resultId;
 
+    /** 🔗 Each result is tied to a voting session */
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
     private Vote votingSession;
 
+    /** 🔗 Each result is tied to a contestant */
     @ManyToOne
     @JoinColumn(name = "contestant_id", nullable = false)
     private Contestant contestant;
@@ -29,9 +31,8 @@ public class Result {
     private int votesCount;
 
     @Column(name = "place")
-    private Integer place;
+    private Integer place; // 1 = winner, 2 = runner-up, etc.
 
     @Column(name = "status", nullable = false)
-    private String status;
-    // Values: draft, final, public
+    private String status; // "winner", "eliminated", "safe"
 }

@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +19,8 @@ public class Vote {
     @Column(name = "session_id", nullable = false, unique = true)
     private String sessionId;
 
-    // 🔗 Linked Show Episode
-    @ManyToOne(fetch = FetchType.LAZY)
+    /** 🔗 Each voting session belongs to one Episode */
+    @ManyToOne
     @JoinColumn(name = "episode_id", nullable = false)
     private Show show;
 
@@ -34,21 +36,7 @@ public class Vote {
     @Column(name = "max_votes_per_user", nullable = false)
     private int maxVotesPerUser;
 
-    // 🔹 New fields for richer functionality
-    @Column(name = "current_votes", nullable = false)
-    private int currentVotes = 0; // live monitoring
-
-    @Column(name = "status", nullable = false)
-    private String status = "Scheduled";
-    // Possible values: Scheduled, Ongoing, Ended, Paused
-
-    /** 🔹 Utility Methods **/
-    public boolean isOngoing() {
-        LocalDateTime now = LocalDateTime.now();
-        return active && now.isAfter(startTime) && now.isBefore(endTime);
-    }
-
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(endTime);
-    }
+    /** 🔗 One session has multiple results (votes per contestant) */
+    @OneToMany(mappedBy = "votingSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Result> results;
 }

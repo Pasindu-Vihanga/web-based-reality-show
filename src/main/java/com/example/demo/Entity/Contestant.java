@@ -18,10 +18,12 @@ public class Contestant {
         @Column(name = "contestant_id", nullable = false, unique = true)
         private String contestantId;
 
-        @Column(name = "name", nullable = false)
+        @Column(name = "name", nullable = false) //name - firstname,lastname
+                                                //DOB
+                                                //age
         private String name;
 
-        @Column(name = "bio", length = 1000)
+        @Column(name = "bio", length = 1000)     //ADD BUTTON
         private String bio;
 
         @Lob

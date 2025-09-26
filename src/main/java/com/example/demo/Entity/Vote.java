@@ -27,7 +27,7 @@ public class Vote {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time", nullable = false) //EDIT
     private LocalDateTime endTime;
 
     @Column(name = "active", nullable = false)

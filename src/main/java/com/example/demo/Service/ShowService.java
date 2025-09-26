@@ -2,6 +2,8 @@ package com.example.demo.Service;
 
 import com.example.demo.DAO.ShowDAO;
 import com.example.demo.Entity.Show;
+import com.example.demo.Config.EpisodeID;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +16,13 @@ public class ShowService {
 
     public ShowService(ShowDAO showDAO) {
         this.showDAO = showDAO;
+    }
+
+    /** ✅ Initialize generator with last episode number from DB */
+    @PostConstruct
+    public void initEpisodeIdGenerator() {
+        int lastNumber = showDAO.getLastEpisodeNumber();
+        EpisodeID.initialize(lastNumber);
     }
 
     public void saveShow(Show show) {

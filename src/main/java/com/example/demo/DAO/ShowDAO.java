@@ -85,4 +85,18 @@ public class ShowDAO {
             return Optional.empty();
         }
     }
+
+    /** ✅ Fetch last numeric episode number from DB */
+    public int getLastEpisodeNumber() {
+        String sql = "SELECT MAX(episode_id) FROM showepi";
+        try {
+            String lastId = jdbcTemplate.queryForObject(sql, String.class);
+            if (lastId != null && lastId.startsWith("EP")) {
+                return Integer.parseInt(lastId.substring(2));
+            }
+        } catch (Exception e) {
+            // table empty → start from 0
+        }
+        return 0;
+    }
 }

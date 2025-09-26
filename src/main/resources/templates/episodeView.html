@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Episode Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body class="bg-light">
 <div class="container mt-4">
@@ -52,11 +53,18 @@
     <table class="table table-hover shadow-sm">
         <thead class="table-dark">
         <tr>
-            <th>Title</th><th>Date</th><th>Time</th><th>Status</th><th>Sessions</th><th>Actions</th>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Sessions</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="ep : ${episodeList}">
+            <td th:text="${ep.episodeId}"></td>
             <td th:text="${ep.showTitle}"></td>
             <td th:text="${ep.showDate}"></td>
             <td th:text="${ep.showTime}"></td>
@@ -67,6 +75,14 @@
                 </ul>
             </td>
             <td>
+                <!-- Edit Button -->
+                <button type="button" class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        th:data-bs-target="'#editModal-' + ${ep.episodeId}">
+                    Edit
+                </button>
+
+                <!-- Delete Form -->
                 <form th:action="@{/delete/{id}(id=${ep.episodeId})}" method="post" class="d-inline">
                     <button class="btn btn-danger btn-sm">Delete</button>
                 </form>
@@ -74,6 +90,59 @@
         </tr>
         </tbody>
     </table>
+</div>
+
+<!-- Edit Episode Modal -->
+<div th:each="ep : ${episodeList}" th:id="'editModal-' + ${ep.episodeId}" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/update}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Episode (<span th:text="${ep.episodeId}"></span>)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden ID -->
+                    <input type="hidden" name="episodeId" th:value="${ep.episodeId}"/>
+
+                    <div class="mb-3">
+                        <label>Title</label>
+                        <input type="text" name="showTitle" class="form-control" th:value="${ep.showTitle}" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label>Type</label>
+                        <input type="text" name="showType" class="form-control" th:value="${ep.showType}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label>Description</label>
+                        <textarea name="showDescription" class="form-control" th:text="${ep.showDescription}"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Date</label>
+                            <input type="date" name="showDate" class="form-control" th:value="${ep.showDate}"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Time</label>
+                            <input type="time" name="showTime" class="form-control" th:value="${ep.showTime}"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Status</label>
+                        <select name="status" class="form-select" th:value="${ep.status}">
+                            <option value="Upcoming">Upcoming</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 </body>
 </html>

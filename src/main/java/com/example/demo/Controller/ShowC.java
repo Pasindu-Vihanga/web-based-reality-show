@@ -3,13 +3,13 @@ package com.example.demo.Controller;
 import com.example.demo.Entity.Admin;
 import com.example.demo.Entity.Show;
 import com.example.demo.Service.ShowService;
+import com.example.demo.Config.EpisodeID;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 public class ShowC {
@@ -35,10 +35,9 @@ public class ShowC {
     /** ================= USER: VIEW ALL EPISODES ================= */
     @GetMapping("/epiforUser")
     public String viewAllEpisodesForUser(Model model) {
-        // No login check → if required, add same logic for User
         List<Show> episodes = showService.getAllShows();
         model.addAttribute("episodeList", episodes);
-        return "epiforUser"; // must exist in templates/
+        return "epiforUser";
     }
 
     /** ================= ADD EPISODE ================= */
@@ -48,10 +47,10 @@ public class ShowC {
         if (loggedInAdmin == null) return "redirect:/loginA";
 
         if (show.getEpisodeId() == null || show.getEpisodeId().isBlank()) {
-            show.setEpisodeId(UUID.randomUUID().toString());
+            show.setEpisodeId(EpisodeID.generateEpisodeId());
         }
         if (show.getStatus() == null || show.getStatus().isBlank()) {
-            show.setStatus("Upcoming"); // default
+            show.setStatus("Upcoming");
         }
 
         if (showService.validateShow(show)) {

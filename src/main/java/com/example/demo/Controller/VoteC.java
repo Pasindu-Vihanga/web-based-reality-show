@@ -9,9 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
-
 @Controller
 public class VoteC {
 
@@ -23,6 +20,7 @@ public class VoteC {
         this.showService = showService;
     }
 
+    /** ================= ADMIN: VIEW ALL VOTING SESSIONS ================= */
     @GetMapping("/voteSessionA")
     public String viewAllSessionsAdmin(HttpSession session, Model model) {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
@@ -34,29 +32,27 @@ public class VoteC {
         return "voteSessionA";
     }
 
+    /** ================= ADD VOTING SESSION ================= */
     @PostMapping("/session/add")
-    public String addSession(@ModelAttribute Vote session, @RequestParam("episodeId") String episodeId, HttpSession httpSession) {
+    public String addSession(@ModelAttribute Vote session, HttpSession httpSession) {
         Admin loggedInAdmin = (Admin) httpSession.getAttribute("loggedInAdmin");
         if (loggedInAdmin == null) return "redirect:/loginA";
 
-        if (session.getSessionId() == null || session.getSessionId().isBlank()) {
-            session.setSessionId(UUID.randomUUID().toString());
-        }
-        showService.findShowById(episodeId).ifPresent(session::setShow);
         voteService.saveSession(session);
         return "redirect:/voteSessionA";
     }
 
+    /** ================= UPDATE VOTING SESSION ================= */
     @PostMapping("/session/update")
-    public String updateSession(@ModelAttribute Vote session, @RequestParam("episodeId") String episodeId, HttpSession httpSession) {
+    public String updateSession(@ModelAttribute Vote session, HttpSession httpSession) {
         Admin loggedInAdmin = (Admin) httpSession.getAttribute("loggedInAdmin");
         if (loggedInAdmin == null) return "redirect:/loginA";
 
-        showService.findShowById(episodeId).ifPresent(session::setShow);
         voteService.updateSession(session);
         return "redirect:/voteSessionA";
     }
 
+    /** ================= DELETE VOTING SESSION ================= */
     @PostMapping("/session/delete/{id}")
     public String deleteSession(@PathVariable("id") String sessionId, HttpSession httpSession) {
         Admin loggedInAdmin = (Admin) httpSession.getAttribute("loggedInAdmin");

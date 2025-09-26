@@ -3,7 +3,6 @@ package com.example.demo.Controller;
 import com.example.demo.Entity.Admin;
 import com.example.demo.Entity.Show;
 import com.example.demo.Service.ShowService;
-import com.example.demo.Config.EpisodeID;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,16 +45,7 @@ public class ShowC {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
         if (loggedInAdmin == null) return "redirect:/loginA";
 
-        if (show.getEpisodeId() == null || show.getEpisodeId().isBlank()) {
-            show.setEpisodeId(EpisodeID.generateEpisodeId());
-        }
-        if (show.getStatus() == null || show.getStatus().isBlank()) {
-            show.setStatus("Upcoming");
-        }
-
-        if (showService.validateShow(show)) {
-            showService.saveShow(show);
-        }
+        showService.saveShow(show);
         return "redirect:/episodeView";
     }
 
@@ -65,9 +55,7 @@ public class ShowC {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
         if (loggedInAdmin == null) return "redirect:/loginA";
 
-        if (showService.validateShow(show)) {
-            showService.updateShow(show);
-        }
+        showService.updateShow(show);
         return "redirect:/episodeView";
     }
 

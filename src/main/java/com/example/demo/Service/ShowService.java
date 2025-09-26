@@ -18,19 +18,27 @@ public class ShowService {
         this.showDAO = showDAO;
     }
 
-    /** ✅ Initialize generator with last episode number from DB */
+    /** Initialize episode ID generator from DB */
     @PostConstruct
     public void initEpisodeIdGenerator() {
         int lastNumber = showDAO.getLastEpisodeNumber();
         EpisodeID.initialize(lastNumber);
     }
 
+    /** Save new show with ID generation + default status */
     public void saveShow(Show show) {
+        if (show.getEpisodeId() == null || show.getEpisodeId().isBlank()) {
+            show.setEpisodeId(EpisodeID.generateEpisodeId());
+        }
+        if (show.getStatus() == null || show.getStatus().isBlank()) {
+            show.setStatus("Upcoming");
+        }
         if (validateShow(show)) {
             showDAO.save(show);
         }
     }
 
+    /** Update existing show */
     public int updateShow(Show show) {
         if (validateShow(show)) {
             return showDAO.update(show);

@@ -76,8 +76,9 @@ public class ResultService {
 
     /** ================= CAST VOTE ================= */
     public void castVote(String sessionId, Contestant contestant) {
-        // Check if this contestant already has a result row in this session
+        // Fetch all results for this session
         List<Result> results = resultDAO.findBySessionId(sessionId);
+
         Optional<Result> existing = results.stream()
                 .filter(r -> r.getContestant().getContestantId().equals(contestant.getContestantId()))
                 .findFirst();
@@ -88,13 +89,22 @@ public class ResultService {
             result.setVotesCount(result.getVotesCount() + 1);
             resultDAO.update(result);
         } else {
-            // Create new result row
+            // Create new result row for this contestant in this session
             Result newResult = new Result();
-            newResult.setVotingSession(new Vote(sessionId, null, null, null, true, 1, null));
+
+            // Create a lightweight Vote object (only ID + default values)
+            Vote voteSession = new Vote();
+            voteSession.setSessionId(sessionId);
+            voteSession.setActive(true);
+            voteSession.setMaxVotesPerUser(1);  // default fallback
+            voteSession.setStatus("Ongoing");   // since casting vote happens during an active session
+
+            newResult.setVotingSession(voteSession);
             newResult.setContestant(contestant);
             newResult.setVotesCount(1);
             newResult.setPlace(null);
-            newResult.setStatus("safe"); // default until processed
+            newResult.setStatus("safe"); // default until processed (e.g. eliminated/qualified later)
+
             resultDAO.save(newResult);
         }
     }

@@ -17,7 +17,6 @@ public class ContestantDAO {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    /** ========== ROW MAPPER ========== */
     private final RowMapper<Contestant> contestantRowMapper = (rs, rowNum) -> {
         Show show = new Show();
         show.setEpisodeId(rs.getString("episode_id"));
@@ -44,7 +43,6 @@ public class ContestantDAO {
         return c;
     };
 
-    /** ========== SAVE ========== */
     public void save(Contestant contestant) {
         String sql = """
             INSERT INTO contestant (contestant_id, name, bio, image, status, episode_id)
@@ -60,7 +58,6 @@ public class ContestantDAO {
         );
     }
 
-    /** ========== UPDATE ========== */
     public int update(Contestant contestant) {
         String sql = """
             UPDATE contestant
@@ -77,13 +74,11 @@ public class ContestantDAO {
         );
     }
 
-    /** ========== DELETE ========== */
     public int delete(String contestantId) {
         String sql = "DELETE FROM contestant WHERE contestant_id=?";
         return jdbcTemplate.update(sql, contestantId);
     }
 
-    /** ========== FIND ALL ========== */
     public List<Contestant> findAll() {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status
@@ -93,7 +88,6 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper);
     }
 
-    /** ========== FIND BY EPISODE ========== */
     public List<Contestant> findByEpisodeId(String episodeId) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status
@@ -104,7 +98,6 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper, episodeId);
     }
 
-    /** ========== FIND BY STATUS ========== */
     public List<Contestant> findByStatus(String status) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status
@@ -115,7 +108,6 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper, status);
     }
 
-    /** ========== FIND BY ID ========== */
     public Optional<Contestant> findById(String contestantId) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status

@@ -6,6 +6,15 @@
   <title>Edit Contestant</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    function previewImage(event, previewId) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById(previewId).src = reader.result;
+      }
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  </script>
 </head>
 <body class="bg-light">
 
@@ -39,11 +48,15 @@
         <!-- Image Upload -->
         <div class="mb-3">
           <label class="form-label">Contestant Image</label>
-          <input type="file" name="imageFile" class="form-control" accept="image/*">
+          <input type="file" name="imageFile" class="form-control" accept="image/*"
+                 onchange="previewImage(event, 'previewImg')">
           <div class="mt-2">
             <!-- ✅ Display existing image -->
-            <img th:if="*{contestantId}" th:src="@{'/contestant/image/' + *{contestantId}}"
-                 class="img-thumbnail" style="max-width:150px;">
+            <img id="previewImg"
+                 th:if="*{contestantId}"
+                 th:src="@{'/images/' + *{contestantId}}"
+                 class="img-thumbnail"
+                 style="max-width:150px;">
           </div>
         </div>
 
@@ -62,7 +75,8 @@
           <select th:field="*{show.episodeId}" class="form-select" required>
             <option th:each="ep : ${episodeList}"
                     th:value="${ep.episodeId}"
-                    th:text="${ep.showTitle + ' (' + ep.episodeId + ')'}">
+                    th:text="${ep.showTitle + ' (' + ep.episodeId + ')'}"
+                    th:selected="${ep.episodeId == contestant.show.episodeId}">
             </option>
           </select>
         </div>

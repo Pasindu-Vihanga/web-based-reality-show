@@ -50,6 +50,7 @@ public class ShowService {
         showDAO.delete(episodeId);
     }
 
+    /** Get all episodes (without sessions attached) */
     public List<Show> getAllShows() {
         return showDAO.findAll();
     }

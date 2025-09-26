@@ -9,9 +9,13 @@ import com.example.demo.Service.ResultService;
 import com.example.demo.Service.ShowService;
 import com.example.demo.Service.VoteService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,16 +52,43 @@ public class ContestantC {
     }
 
     @PostMapping("/contestant/add")
-    public String addContestant(@ModelAttribute Contestant contestant, HttpSession session) {
+    public String addContestant(@ModelAttribute Contestant contestant,
+                                @RequestParam("imageFile") MultipartFile imageFile,
+                                HttpSession session) throws Exception {
         Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
         if (loggedInAdmin == null) return "redirect:/loginA";
 
         if (contestant.getContestantId() == null || contestant.getContestantId().isBlank()) {
             contestant.setContestantId(UUID.randomUUID().toString());
         }
+
+        if (!imageFile.isEmpty()) {
+            contestant.setImage(imageFile.getBytes());
+        }
+
         contestantService.saveContestant(contestant);
         return "redirect:/contestantView";
     }
+
+    @PostMapping("/contestant/update")
+    public String updateContestant(@ModelAttribute Contestant contestant,
+                                   @RequestParam("imageFile") MultipartFile imageFile,
+                                   HttpSession session) throws Exception {
+        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
+        if (loggedInAdmin == null) return "redirect:/loginA";
+
+        if (!imageFile.isEmpty()) {
+            contestant.setImage(imageFile.getBytes());
+        } else {
+            // Keep old image if no new one uploaded
+            contestantService.findContestantById(contestant.getContestantId())
+                    .ifPresent(c -> contestant.setImage(c.getImage()));
+        }
+
+        contestantService.updateContestant(contestant);
+        return "redirect:/contestantView";
+    }
+
 
     @GetMapping("/contestant/edit/{id}")
     public String editContestant(@PathVariable("id") String contestantId, Model model, HttpSession session) {
@@ -73,14 +104,6 @@ public class ContestantC {
         return "redirect:/contestantView";
     }
 
-    @PostMapping("/contestant/update")
-    public String updateContestant(@ModelAttribute Contestant contestant, HttpSession session) {
-        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) return "redirect:/loginA";
-
-        contestantService.updateContestant(contestant);
-        return "redirect:/contestantView";
-    }
 
     @PostMapping("/contestant/delete/{id}")
     public String deleteContestant(@PathVariable("id") String contestantId, HttpSession session) {
@@ -143,5 +166,18 @@ public class ContestantC {
 
         model.addAttribute("message", "Your vote has been recorded!");
         return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+    }
+
+    /* ================== SERVE CONTESTANT IMAGE ================== */
+    @GetMapping("/images/{contestantId}")
+    public ResponseEntity<byte[]> getContestantImage(@PathVariable("contestantId") String contestantId) {
+        Optional<Contestant> contestantOpt = contestantService.findContestantById(contestantId);
+        if (contestantOpt.isPresent() && contestantOpt.get().getImage() != null) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + contestantId + ".jpg\"")
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(contestantOpt.get().getImage());
+        }
+        return ResponseEntity.notFound().build();
     }
 }

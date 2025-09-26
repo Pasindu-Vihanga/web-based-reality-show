@@ -18,12 +18,10 @@ public class Contestant {
         @Column(name = "contestant_id", nullable = false, unique = true)
         private String contestantId;
 
-        @Column(name = "name", nullable = false) //name - firstname,lastname
-                                                //DOB
-                                                //age
-        private String name;
+        @Column(name = "name", nullable = false)
+        private String name; // full name (first + last)
 
-        @Column(name = "bio", length = 1000)     //ADD BUTTON
+        @Column(name = "bio", length = 1000)
         private String bio;
 
         @Lob
@@ -31,14 +29,14 @@ public class Contestant {
         private byte[] image;
 
         @Column(name = "status", nullable = false)
-        private String status; // "active", "eliminated"
+        private String status; // active, eliminated
 
         /** 🔗 Each contestant belongs to one Episode */
         @ManyToOne
         @JoinColumn(name = "episode_id", nullable = false)
         private Show show;
 
-        /** 🔗 Contestant can appear in multiple Results (votes across sessions) */
+        /** 🔗 Contestant appears in multiple results (votes across sessions) */
         @OneToMany(mappedBy = "contestant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
         private List<Result> results;
 }

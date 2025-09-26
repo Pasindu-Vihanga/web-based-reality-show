@@ -29,7 +29,6 @@ public class ContestantService {
         return contestantDAO.findByStatus(status);
     }
 
-    /** ✅ Fix: method renamed to match controller */
     public Optional<Contestant> findContestantById(String contestantId) {
         return contestantDAO.findById(contestantId);
     }

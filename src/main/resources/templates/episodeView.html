@@ -3,39 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <title>Episode Management</title>
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --accent: #ff4d94;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            background: linear-gradient(to right, #ff4d94, #6a11cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+        }
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .table {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .table thead {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+        .table-hover tbody tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 30px;
+        }
+
+        .bg-primary {
+            background: linear-gradient(to right, #36d1dc, #5b86e5) !important;
+        }
+        .bg-info {
+            background: linear-gradient(to right, #ff4d94, #6a11cb) !important;
+        }
+        .bg-success {
+            background: linear-gradient(to right, var(--primary), var(--secondary)) !important;
+        }
+        .bg-secondary {
+            background: linear-gradient(to right, #868f96, #596164) !important;
+        }
+    </style>
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-    <h2 class="text-primary">Episode Management</h2>
+<body>
+<div class="container py-5">
+    <h2>Episode Management</h2>
 
     <!-- Add Episode -->
-    <form th:action="@{/add}" th:object="${show}" method="post" class="card p-3 mb-4 shadow-sm">
+    <form th:action="@{/add}" th:object="${show}" method="post" class="card p-4 mb-5 shadow-lg">
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label>Title</label>
+                <label class="form-label">Title</label>
                 <input type="text" th:field="*{showTitle}" class="form-control" required>
             </div>
             <div class="col-md-6 mb-3">
-                <label>Type</label>
+                <label class="form-label">Type</label>
                 <input type="text" th:field="*{showType}" class="form-control">
             </div>
         </div>
         <div class="mb-3">
-            <label>Description</label>
+            <label class="form-label">Description</label>
             <textarea th:field="*{showDescription}" class="form-control"></textarea>
         </div>
         <div class="row">
             <div class="col-md-3 mb-3">
-                <label>Date</label>
+                <label class="form-label">Date</label>
                 <input type="date" th:field="*{showDate}" class="form-control">
             </div>
             <div class="col-md-3 mb-3">
-                <label>Time</label>
+                <label class="form-label">Time</label>
                 <input type="time" th:field="*{showTime}" class="form-control">
             </div>
             <div class="col-md-3 mb-3">
-                <label>Status</label>
+                <label class="form-label">Status</label>
                 <select th:field="*{status}" class="form-select">
                     <option value="Upcoming">Upcoming</option>
                     <option value="Ongoing">Ongoing</option>
@@ -49,52 +147,54 @@
     </form>
 
     <!-- Episodes Table -->
-    <table class="table table-hover shadow-sm">
-        <thead class="table-dark">
-        <tr>
-            <th>Title</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-            <th>Voting Sessions</th>
-            <th>Contestants</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="ep : ${episodeList}">
-            <td th:text="${ep.showTitle}"></td>
-            <td th:text="${ep.showDate}"></td>
-            <td th:text="${ep.showTime}"></td>
-            <td th:text="${ep.status}"></td>
-            <td>
-                <ul class="list-unstyled mb-0">
-                    <li th:each="s : ${ep.sessions}">
-                        <span class="badge bg-primary" th:text="${s.sessionId}"></span>
-                        (<span th:text="${#temporals.format(s.startTime, 'yyyy-MM-dd HH:mm')}"></span> →
-                        <span th:text="${#temporals.format(s.endTime, 'yyyy-MM-dd HH:mm')}"></span>)
-                        <span class="badge bg-info" th:text="${s.status}"></span>
-                    </li>
-                    <li th:if="${#lists.isEmpty(ep.sessions)}" class="text-muted">No sessions yet</li>
-                </ul>
-            </td>
-            <td>
-                <ul class="list-unstyled mb-0">
-                    <li th:each="c : ${ep.contestants}">
-                        <span class="badge bg-success" th:text="${c.name}"></span>
-                        <span th:text="'[' + ${c.status} + ']'"></span>
-                    </li>
-                    <li th:if="${#lists.isEmpty(ep.contestants)}" class="text-muted">No contestants yet</li>
-                </ul>
-            </td>
-            <td>
-                <form th:action="@{/delete/{id}(id=${ep.episodeId})}" method="post" class="d-inline">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-hover shadow-lg">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Voting Sessions</th>
+                <th>Contestants</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ep : ${episodeList}">
+                <td th:text="${ep.showTitle}"></td>
+                <td th:text="${ep.showDate}"></td>
+                <td th:text="${ep.showTime}"></td>
+                <td th:text="${ep.status}"></td>
+                <td>
+                    <ul class="list-unstyled mb-0">
+                        <li th:each="s : ${ep.sessions}">
+                            <span class="badge bg-primary" th:text="${s.sessionId}"></span>
+                            (<span th:text="${#temporals.format(s.startTime, 'yyyy-MM-dd HH:mm')}"></span> →
+                            <span th:text="${#temporals.format(s.endTime, 'yyyy-MM-dd HH:mm')}"></span>)
+                            <span class="badge bg-info" th:text="${s.status}"></span>
+                        </li>
+                        <li th:if="${#lists.isEmpty(ep.sessions)}" class="text-muted">No sessions yet</li>
+                    </ul>
+                </td>
+                <td>
+                    <ul class="list-unstyled mb-0">
+                        <li th:each="c : ${ep.contestants}">
+                            <span class="badge bg-success" th:text="${c.name}"></span>
+                            <span th:text="'[' + ${c.status} + ']'"></span>
+                        </li>
+                        <li th:if="${#lists.isEmpty(ep.contestants)}" class="text-muted">No contestants yet</li>
+                    </ul>
+                </td>
+                <td>
+                    <form th:action="@{/delete/{id}(id=${ep.episodeId})}" method="post" class="d-inline">
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>

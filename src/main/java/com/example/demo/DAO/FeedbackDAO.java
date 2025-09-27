@@ -31,13 +31,12 @@ public class FeedbackDAO {
                     rs.getLong("feedback_id"),
                     user,
                     rs.getString("message"),
-                    rs.getInt("rating"),
+                    rs.getObject("rating") != null ? rs.getInt("rating") : null,
                     rs.getTimestamp("submitted_at").toLocalDateTime()
             );
         }
     };
 
-    /** ================== SAVE ================== */
     public void save(Feedback feedback) {
         String sql = "INSERT INTO feedback (user_id, message, rating, submitted_at) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql,
@@ -48,7 +47,6 @@ public class FeedbackDAO {
         );
     }
 
-    /** ================== UPDATE ================== */
     public int update(Feedback feedback) {
         String sql = "UPDATE feedback SET message=?, rating=?, submitted_at=? WHERE feedback_id=?";
         return jdbcTemplate.update(sql,
@@ -59,13 +57,11 @@ public class FeedbackDAO {
         );
     }
 
-    /** ================== DELETE ================== */
     public int delete(Long feedbackId) {
         String sql = "DELETE FROM feedback WHERE feedback_id=?";
         return jdbcTemplate.update(sql, feedbackId);
     }
 
-    /** ================== FIND ALL ================== */
     public List<Feedback> findAll() {
         String sql = """
             SELECT f.*, u.username, u.email
@@ -76,7 +72,6 @@ public class FeedbackDAO {
         return jdbcTemplate.query(sql, feedbackRowMapper);
     }
 
-    /** ================== FIND BY USER ================== */
     public List<Feedback> findByUserId(String userId) {
         String sql = """
             SELECT f.*, u.username, u.email
@@ -88,7 +83,6 @@ public class FeedbackDAO {
         return jdbcTemplate.query(sql, feedbackRowMapper, userId);
     }
 
-    /** ================== FIND BY ID ================== */
     public Optional<Feedback> findById(Long feedbackId) {
         String sql = """
             SELECT f.*, u.username, u.email

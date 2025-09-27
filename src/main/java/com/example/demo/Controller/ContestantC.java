@@ -1,6 +1,6 @@
 package com.example.demo.Controller;
 
-import com.example.demo.Entity.Admin;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.demo.Entity.Contestant;
 import com.example.demo.Entity.User;
 import com.example.demo.Entity.Vote;
@@ -68,24 +68,25 @@ public class ContestantC {
     @PostMapping("/vote/{contestantId}")
     public String voteForContestant(@PathVariable("contestantId") String contestantId,
                                     HttpSession session,
-                                    Model model) {
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) return "redirect:/loginU";
 
         Optional<Contestant> contestantOpt = contestantService.findContestantById(contestantId);
         if (contestantOpt.isEmpty()) {
-            model.addAttribute("error", "Contestant not found.");
-            return "redirect:/epiforUser";
+            redirectAttributes.addFlashAttribute("error", "Contestant not found.");
+            return "redirect:/feedbackU";
         }
 
         Contestant contestant = contestantOpt.get();
 
         if (!"active".equalsIgnoreCase(contestant.getStatus())) {
-            model.addAttribute("error", "You cannot vote for an eliminated contestant.");
-            return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+            redirectAttributes.addFlashAttribute("error", "You cannot vote for an eliminated contestant.");
+            return "redirect:/feedbackU";
         }
 
-        // ✅ find active session for this episode
+        // Find active session
         List<Vote> activeSessions = voteService.getActiveSessions();
         Vote sessionForEpisode = activeSessions.stream()
                 .filter(s -> s.getShow().getEpisodeId().equals(contestant.getShow().getEpisodeId()))
@@ -93,26 +94,27 @@ public class ContestantC {
                 .orElse(null);
 
         if (sessionForEpisode == null) {
-            model.addAttribute("error", "No active voting session for this episode.");
-            return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+            redirectAttributes.addFlashAttribute("error", "No active voting session for this episode.");
+            return "redirect:/feedbackU";
         }
 
-        // ✅ check if user already voted in this session
+        // Prevent multiple votes → still redirect to feedback
         String votedKey = "voted-" + sessionForEpisode.getSessionId();
         if (session.getAttribute(votedKey) != null) {
-            model.addAttribute("error", "You have already voted in this session.");
-            return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+            redirectAttributes.addFlashAttribute("message", "You have already voted in this session.");
+            return "redirect:/feedbackU";
         }
 
-        // ✅ Cast vote
+        // Cast vote
         resultService.castVote(sessionForEpisode.getSessionId(), contestant);
-
-        // ✅ Mark as voted for this session
         session.setAttribute(votedKey, true);
 
-        model.addAttribute("message", "Your vote has been recorded!");
-        return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+        // ✅ Thank-you message
+        redirectAttributes.addFlashAttribute("message", "✅ Thank you for voting! Please leave your feedback below.");
+        return "redirect:/feedbackU";
     }
+
+
 
     /* ================== SERVE CONTESTANT IMAGE ================== */
     @GetMapping("/images/{contestantId}")

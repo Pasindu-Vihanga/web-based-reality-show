@@ -16,7 +16,6 @@ public class FeedbackService {
         this.feedbackDAO = feedbackDAO;
     }
 
-    /** ================== SAVE FEEDBACK ================== */
     public void saveFeedback(Feedback feedback) {
         if (validateFeedback(feedback)) {
             feedbackDAO.save(feedback);
@@ -25,7 +24,6 @@ public class FeedbackService {
         }
     }
 
-    /** ================== UPDATE FEEDBACK ================== */
     public int updateFeedback(Feedback feedback) {
         if (validateFeedback(feedback)) {
             return feedbackDAO.update(feedback);
@@ -33,31 +31,27 @@ public class FeedbackService {
         return 0;
     }
 
-    /** ================== DELETE FEEDBACK ================== */
     public int deleteFeedback(Long feedbackId) {
         return feedbackDAO.delete(feedbackId);
     }
 
-    /** ================== GET ALL FEEDBACK (ADMIN) ================== */
     public List<Feedback> getAllFeedback() {
         return feedbackDAO.findAll();
     }
 
-    /** ================== GET FEEDBACK BY USER ================== */
     public List<Feedback> findByUserId(String userId) {
         return feedbackDAO.findByUserId(userId);
     }
 
-    /** ================== GET FEEDBACK BY ID ================== */
     public Optional<Feedback> findById(Long feedbackId) {
         return feedbackDAO.findById(feedbackId);
     }
 
-    /** ================== VALIDATION ================== */
     public boolean validateFeedback(Feedback feedback) {
-        if (feedback == null) return false;
-        if (feedback.getUser() == null || feedback.getUser().getUserId() == null) return false;
-        if (feedback.getMessage() == null || feedback.getMessage().trim().isEmpty()) return false;
-        return true;
+        return feedback != null &&
+                feedback.getUser() != null &&
+                feedback.getUser().getUserId() != null &&
+                feedback.getMessage() != null &&
+                !feedback.getMessage().trim().isEmpty();
     }
 }

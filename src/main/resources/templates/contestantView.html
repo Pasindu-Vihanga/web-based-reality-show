@@ -4,93 +4,171 @@
     <meta charset="UTF-8">
     <title>Contestant Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script>
-        function previewImage(event, previewId) {
-            const reader = new FileReader();
-            reader.onload = function () {
-                document.getElementById(previewId).src = reader.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-    <h2 class="text-primary">Contestant Management</h2>
+<body class="bg-gray-50">
 
-    <!-- Add Contestant Form -->
-    <form th:action="@{/contestant/add}" th:object="${contestant}" method="post" enctype="multipart/form-data"
-          class="card p-3 mb-4 shadow-sm">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label>Name</label>
-                <input type="text" th:field="*{name}" class="form-control" required>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
+    <div class="container">
+        <a class="navbar-brand font-bold text-indigo-600" href="/contestantView">Contestant Management</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/contestantView">All Contestants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/contestantSummary">Summary</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <h1 class="text-2xl font-bold text-center mb-4">Contestants</h1>
+
+    <!-- Flash Messages -->
+    <div th:if="${message}" class="alert alert-success text-center" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
+
+    <!-- Add Contestant Button -->
+    <div class="text-end mb-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContestantModal">+ Add Contestant</button>
+    </div>
+
+    <!-- Contestant List -->
+    <div class="row">
+        <div class="col-md-4 mb-4" th:each="c : ${contestantList}">
+            <div class="card shadow-lg rounded-2xl h-100">
+                <img th:if="${c.image != null}" th:src="@{/images/{id}(id=${c.contestantId})}"
+                     class="card-img-top rounded-t-2xl" alt="Contestant Image">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-indigo-700 font-semibold" th:text="${c.name}">Contestant Name</h5>
+                    <p class="card-text text-gray-600" th:text="${c.bio}">Contestant Bio</p>
+
+                    <!-- ✅ Status Badge with th:switch -->
+                    <div th:switch="${c.status}">
+                        <span th:case="'active'" class="badge bg-success" th:text="${c.status}"></span>
+                        <span th:case="'eliminated'" class="badge bg-danger" th:text="${c.status}"></span>
+                        <span th:case="'winner'" class="badge bg-warning text-dark" th:text="${c.status}"></span>
+                        <span th:case="'runnerup'" class="badge bg-secondary" th:text="${c.status}"></span>
+                        <span th:case="*" class="badge bg-light text-dark" th:text="${c.status}"></span>
+                    </div>
+
+                    <!-- Actions -->
+                    <form th:action="@{/contestant/delete/{id}(id=${c.contestantId})}" method="post" class="mt-3">
+                        <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
+                    </form>
+                    <button class="btn btn-warning btn-sm mt-2 w-100"
+                            data-bs-toggle="modal"
+                            th:attr="data-bs-target='#editModal-' + ${c.contestantId}">
+                        Edit
+                    </button>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label>Status</label>
-                <select th:field="*{status}" class="form-select" required>
-                    <option value="active">Active</option>
-                    <option value="eliminated">Eliminated</option>
-                </select>
-            </div>
         </div>
-
-        <div class="mb-3">
-            <label>Bio</label>
-            <textarea th:field="*{bio}" class="form-control"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label>Episode</label>
-            <select th:field="*{show.episodeId}" class="form-select" required>
-                <option th:each="ep : ${episodeList}" th:value="${ep.episodeId}" th:text="${ep.showTitle}"></option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label>Image</label>
-            <input type="file" name="imageFile" class="form-control"
-                   onchange="previewImage(event, 'previewNew')">
-            <img id="previewNew" src="" class="img-fluid mt-2" style="max-height:150px; display:block;">
-        </div>
-
-        <button type="submit" class="btn btn-success">Add Contestant</button>
-    </form>
-
-    <!-- Contestants Table -->
-    <table class="table table-hover shadow-sm">
-        <thead class="table-dark">
-        <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Bio</th>
-            <th>Status</th>
-            <th>Episode</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="c : ${contestantList}">
-            <td>
-                <img th:if="${c.image != null}" th:src="@{'/images/' + ${c.contestantId}}"
-                     class="img-thumbnail" style="max-height:80px;">
-            </td>
-            <td th:text="${c.name}"></td>
-            <td th:text="${c.bio}"></td>
-            <td>
-                <span class="badge" th:classappend="${c.status == 'active'} ? 'bg-success' : 'bg-secondary'"
-                      th:text="${c.status}"></span>
-            </td>
-            <td th:text="${c.show.showTitle}"></td>
-            <td>
-                <a th:href="@{/contestant/edit/{id}(id=${c.contestantId})}" class="btn btn-primary btn-sm">Edit</a>
-                <form th:action="@{/contestant/delete/{id}(id=${c.contestantId})}" method="post" class="d-inline">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    </div>
 </div>
+
+<!-- Add Contestant Modal -->
+<div class="modal fade" id="addContestantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/contestant/add}" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Contestant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Bio</label>
+                        <textarea class="form-control" name="bio"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            <option value="active">Active</option>
+                            <option value="eliminated">Eliminated</option>
+                            <option value="winner">Winner</option>
+                            <option value="runnerup">Runner Up</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Episode</label>
+                        <select class="form-control" name="show.episodeId" required>
+                            <option th:each="ep : ${episodeList}" th:value="${ep.episodeId}" th:text="${ep.showTitle}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Image</label>
+                        <input type="file" class="form-control" name="imageFile" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Contestant Modal (Dynamic) -->
+<div th:each="c : ${contestantList}" class="modal fade"
+     th:id="'editModal-' + ${c.contestantId}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/contestant/update}" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Contestant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- ✅ Hidden ID so update works -->
+                    <input type="hidden" name="contestantId" th:value="${c.contestantId}">
+
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" class="form-control" name="name" th:value="${c.name}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Bio</label>
+                        <textarea class="form-control" name="bio" th:text="${c.bio}"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            <option value="active" th:selected="${c.status=='active'}">Active</option>
+                            <option value="eliminated" th:selected="${c.status=='eliminated'}">Eliminated</option>
+                            <option value="winner" th:selected="${c.status=='winner'}">Winner</option>
+                            <option value="runnerup" th:selected="${c.status=='runnerup'}">Runner Up</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Episode</label>
+                        <select class="form-control" name="show.episodeId">
+                            <option th:each="ep : ${episodeList}" th:value="${ep.episodeId}"
+                                    th:selected="${c.show != null and ep.episodeId == c.show.episodeId}"
+                                    th:text="${ep.showTitle}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Image</label>
+                        <input type="file" class="form-control" name="imageFile" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

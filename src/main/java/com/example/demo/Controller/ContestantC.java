@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.demo.Entity.Contestant;
 import com.example.demo.Entity.User;
@@ -38,6 +39,78 @@ public class ContestantC {
         this.resultService = resultService;
     }
 
+    /* ================== ADMIN/USER: VIEW ALL CONTESTANTS ================== */
+    @GetMapping("/contestantView")
+    public String viewAllContestants(Model model) {
+        List<Contestant> contestants = contestantService.getAllContestants();
+        model.addAttribute("contestantList", contestants);
+        model.addAttribute("contestant", new Contestant()); // for Add modal
+        model.addAttribute("episodeList", showService.getAllShows()); // dropdown episodes
+        return "contestantView";
+    }
+
+    /* ================== SAFE: GET /contestant/add → redirect ================== */
+    @GetMapping("/contestant/add")
+    public String redirectAddGet() {
+        return "redirect:/contestantView";
+    }
+
+    /* ================== ADMIN: ADD CONTESTANT ================== */
+    @PostMapping("/contestant/add")
+    public String addContestant(@ModelAttribute Contestant contestant,
+                                @RequestParam("imageFile") MultipartFile imageFile,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            // ✅ Generate UUID for new contestant
+            contestant.setContestantId(UUID.randomUUID().toString());
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                contestant.setImage(imageFile.getBytes());
+            }
+
+            contestantService.saveContestant(contestant);
+            redirectAttributes.addFlashAttribute("message", "✅ Contestant added successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to add contestant.");
+        }
+        return "redirect:/contestantView";
+    }
+
+    /* ================== ADMIN: UPDATE CONTESTANT ================== */
+    @PostMapping("/contestant/update")
+    public String updateContestant(@ModelAttribute Contestant contestant,
+                                   @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                contestant.setImage(imageFile.getBytes());
+            } else {
+                // Keep old image if not uploaded
+                contestant.setImage(contestantService.findContestantById(contestant.getContestantId())
+                        .map(Contestant::getImage)
+                        .orElse(null));
+            }
+            contestantService.saveContestant(contestant);
+            redirectAttributes.addFlashAttribute("message", "✏️ Contestant updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to update contestant.");
+        }
+        return "redirect:/contestantView";
+    }
+
+    /* ================== ADMIN: DELETE CONTESTANT ================== */
+    @PostMapping("/contestant/delete/{id}")
+    public String deleteContestant(@PathVariable("id") String contestantId,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            contestantService.deleteContestant(contestantId);
+            redirectAttributes.addFlashAttribute("message", "🗑 Contestant deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to delete contestant.");
+        }
+        return "redirect:/contestantView";
+    }
+
     /* ================== USER: VIEW CONTESTANTS BY EPISODE ================== */
     @GetMapping("/contestantForUser/{episodeId}")
     public String viewContestantsForUser(@PathVariable("episodeId") String episodeId,
@@ -50,7 +123,7 @@ public class ContestantC {
         model.addAttribute("contestantList", contestants);
         model.addAttribute("episodeId", episodeId);
 
-        // ✅ find active session for this episode
+        // Find active voting session for this episode
         List<Vote> activeSessions = voteService.getActiveSessions();
         Vote sessionForEpisode = activeSessions.stream()
                 .filter(s -> s.getShow().getEpisodeId().equals(episodeId))
@@ -68,7 +141,6 @@ public class ContestantC {
     @PostMapping("/vote/{contestantId}")
     public String voteForContestant(@PathVariable("contestantId") String contestantId,
                                     HttpSession session,
-                                    Model model,
                                     RedirectAttributes redirectAttributes) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) return "redirect:/loginU";
@@ -80,13 +152,12 @@ public class ContestantC {
         }
 
         Contestant contestant = contestantOpt.get();
-
         if (!"active".equalsIgnoreCase(contestant.getStatus())) {
             redirectAttributes.addFlashAttribute("error", "You cannot vote for an eliminated contestant.");
             return "redirect:/feedbackU";
         }
 
-        // Find active session
+        // Find active session for this contestant’s episode
         List<Vote> activeSessions = voteService.getActiveSessions();
         Vote sessionForEpisode = activeSessions.stream()
                 .filter(s -> s.getShow().getEpisodeId().equals(contestant.getShow().getEpisodeId()))
@@ -98,23 +169,19 @@ public class ContestantC {
             return "redirect:/feedbackU";
         }
 
-        // Prevent multiple votes → still redirect to feedback
+        // Prevent multiple votes
         String votedKey = "voted-" + sessionForEpisode.getSessionId();
         if (session.getAttribute(votedKey) != null) {
             redirectAttributes.addFlashAttribute("message", "You have already voted in this session.");
             return "redirect:/feedbackU";
         }
 
-        // Cast vote
         resultService.castVote(sessionForEpisode.getSessionId(), contestant);
         session.setAttribute(votedKey, true);
 
-        // ✅ Thank-you message
         redirectAttributes.addFlashAttribute("message", "✅ Thank you for voting! Please leave your feedback below.");
         return "redirect:/feedbackU";
     }
-
-
 
     /* ================== SERVE CONTESTANT IMAGE ================== */
     @GetMapping("/images/{contestantId}")
@@ -135,7 +202,6 @@ public class ContestantC {
         List<Contestant> contestants = contestantService.getAllContestants();
         model.addAttribute("contestantList", contestants);
 
-        // ✅ Extract Winner & Runner-up if available
         Contestant winner = contestants.stream()
                 .filter(c -> "winner".equalsIgnoreCase(c.getStatus()))
                 .findFirst().orElse(null);
@@ -149,5 +215,4 @@ public class ContestantC {
 
         return "contestantSum";
     }
-
 }

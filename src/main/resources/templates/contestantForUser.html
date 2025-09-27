@@ -8,27 +8,30 @@
 <body class="bg-light">
 <div class="container mt-4">
 
-    <h2 class="text-center text-primary mb-4">Contestants for Episode
-        <span th:text="${episodeId}"></span>
+    <h2 class="text-center text-primary mb-4">
+        Contestants for Episode <span th:text="${episodeId}"></span>
     </h2>
 
     <!-- Messages -->
     <div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
     <div th:if="${message}" class="alert alert-success text-center" th:text="${message}"></div>
 
+    <!-- Contestants -->
     <div th:if="${#lists.isEmpty(contestantList)}" class="alert alert-info text-center">
         No contestants available for this episode.
     </div>
 
-    <!-- Contestant Grid -->
     <div class="row" th:if="${!#lists.isEmpty(contestantList)}">
         <div class="col-md-4 mb-4" th:each="c : ${contestantList}">
             <div class="card shadow-sm h-100">
+
                 <!-- Contestant Image -->
                 <img th:if="${c.image != null}"
                      th:src="@{'/images/' + ${c.contestantId}}"
                      class="card-img-top"
-                     alt="Contestant Image">
+                     alt="Contestant Image"
+                     style="max-height:200px; object-fit:cover;">
+
                 <div class="card-body text-center">
                     <h5 th:text="${c.name}" class="card-title"></h5>
                     <p th:text="${c.bio}" class="card-text"></p>
@@ -36,20 +39,27 @@
                           th:classappend="${c.status == 'active'} ? 'bg-success' : 'bg-secondary'"
                           th:text="${c.status}"></span>
 
-                    <!-- Vote Count (from results if available) -->
-                    <p class="mt-2">
-                        Votes:
-                        <span th:text="${c.results != null && !#lists.isEmpty(c.results)
-                            ? c.results.get(0).votesCount : 0}"></span>
-                    </p>
+                    <!-- ✅ Voting UI -->
+                    <div class="mt-3">
+                        <!-- Show Vote button only if not voted yet -->
+                        <form th:if="${session['voted-' + currentSessionId] == null}"
+                              th:action="@{/vote/{id}(id=${c.contestantId})}"
+                              method="post">
+                            <button type="submit"
+                                    class="btn btn-success btn-sm w-100"
+                                    th:disabled="${c.status != 'active'}">
+                                Vote
+                            </button>
+                        </form>
 
-                    <!-- Vote Button -->
-                    <form th:action="@{/vote/{id}(id=${c.contestantId})}" method="post">
-                        <button type="submit" class="btn btn-success btn-sm mt-2"
-                                th:disabled="${c.status != 'active'}">
-                            Vote
-                        </button>
-                    </form>
+                        <!-- Show "Voted" if already voted -->
+                        <div th:if="${session['voted-' + currentSessionId] != null}">
+                            <button class="btn btn-secondary btn-sm w-100" disabled>
+                                Voted &#10003;
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

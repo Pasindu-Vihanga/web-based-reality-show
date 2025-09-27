@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 public class VoteC {
 
@@ -34,6 +36,17 @@ public class VoteC {
         model.addAttribute("episodeList", showService.getAllShows());
         model.addAttribute("newSession", new Vote());
         return "voteSessionA";
+    }
+
+    @GetMapping("/voteSessionU")
+    public String viewUserVotingSessions(Model model) {
+        // Fetch only ongoing sessions
+        List<Vote> ongoingSessions = voteService.getAllSessions().stream()
+                .filter(s -> "Ongoing".equalsIgnoreCase(s.getStatus()))
+                .toList();
+
+        model.addAttribute("sessionList", ongoingSessions);
+        return "voteSessionU"; // your user template
     }
 
     /** ================= ADD VOTING SESSION ================= */

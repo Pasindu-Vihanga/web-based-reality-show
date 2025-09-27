@@ -2,8 +2,11 @@ package com.example.demo.Service;
 
 import com.example.demo.DAO.ShowDAO;
 import com.example.demo.Entity.Show;
+import com.example.demo.Entity.Vote;
+import com.example.demo.Entity.Contestant;
 import com.example.demo.Config.EpisodeID;
 import jakarta.annotation.PostConstruct;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +16,15 @@ import java.util.Optional;
 public class ShowService {
 
     private final ShowDAO showDAO;
+    private final ContestantService contestantService;
+    private final VoteService voteService; // ✅ keep VoteService
 
-    public ShowService(ShowDAO showDAO) {
+    public ShowService(ShowDAO showDAO,
+                       ContestantService contestantService,
+                       @Lazy VoteService voteService) { // ✅ lazy injection
         this.showDAO = showDAO;
+        this.contestantService = contestantService;
+        this.voteService = voteService;
     }
 
     /** Initialize episode ID generator from DB */
@@ -25,7 +34,7 @@ public class ShowService {
         EpisodeID.initialize(lastNumber);
     }
 
-    /** Save new show with ID generation + default status */
+    /** Save new episode */
     public void saveShow(Show show) {
         if (show.getEpisodeId() == null || show.getEpisodeId().isBlank()) {
             show.setEpisodeId(EpisodeID.generateEpisodeId());
@@ -38,7 +47,7 @@ public class ShowService {
         }
     }
 
-    /** Update existing show */
+    /** Update existing episode */
     public int updateShow(Show show) {
         if (validateShow(show)) {
             return showDAO.update(show);
@@ -50,17 +59,29 @@ public class ShowService {
         showDAO.delete(episodeId);
     }
 
-    /** Get all episodes (without sessions attached) */
+    /** Get all episodes enriched with sessions + contestants */
     public List<Show> getAllShows() {
-        return showDAO.findAll();
+        List<Show> shows = showDAO.findAll();
+        for (Show show : shows) {
+            List<Vote> sessions = voteService.findSessionsByEpisode(show.getEpisodeId());
+            List<Contestant> contestants = contestantService.findByEpisodeId(show.getEpisodeId());
+            show.setSessions(sessions);
+            show.setContestants(contestants);
+        }
+        return shows;
+    }
+
+    public Optional<Show> findShowById(String episodeId) {
+        Optional<Show> showOpt = showDAO.findById(episodeId);
+        showOpt.ifPresent(show -> {
+            show.setSessions(voteService.findSessionsByEpisode(episodeId));
+            show.setContestants(contestantService.findByEpisodeId(episodeId));
+        });
+        return showOpt;
     }
 
     public List<Show> findShowsByTitle(String title) {
         return showDAO.findByTitle(title);
-    }
-
-    public Optional<Show> findShowById(String episodeId) {
-        return showDAO.findById(episodeId);
     }
 
     public boolean validateShow(Show show) {

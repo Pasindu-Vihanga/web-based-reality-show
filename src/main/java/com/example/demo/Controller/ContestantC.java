@@ -126,6 +126,7 @@ public class ContestantC {
         model.addAttribute("contestantList", contestants);
         model.addAttribute("episodeId", episodeId);
         return "contestantForUser";
+
     }
 
     /* ================== USER: VOTE FOR CONTESTANT ================== */
@@ -164,9 +165,12 @@ public class ContestantC {
         // ✅ Cast vote
         resultService.castVote(sessionForEpisode.getSessionId(), contestant);
 
-        model.addAttribute("message", "Your vote has been recorded!");
+        // ✅ Mark this user as voted (per session)
+        session.setAttribute("voted-" + sessionForEpisode.getSessionId(), true);
+
         return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
     }
+
 
     /* ================== SERVE CONTESTANT IMAGE ================== */
     @GetMapping("/images/{contestantId}")

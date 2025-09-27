@@ -57,6 +57,7 @@
             <th>Time</th>
             <th>Status</th>
             <th>Voting Sessions</th>
+            <th>Contestants</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -75,6 +76,15 @@
                         <span class="badge bg-info" th:text="${s.status}"></span>
                     </li>
                     <li th:if="${#lists.isEmpty(ep.sessions)}" class="text-muted">No sessions yet</li>
+                </ul>
+            </td>
+            <td>
+                <ul class="list-unstyled mb-0">
+                    <li th:each="c : ${ep.contestants}">
+                        <span class="badge bg-success" th:text="${c.name}"></span>
+                        <span th:text="'[' + ${c.status} + ']'"></span>
+                    </li>
+                    <li th:if="${#lists.isEmpty(ep.contestants)}" class="text-muted">No contestants yet</li>
                 </ul>
             </td>
             <td>

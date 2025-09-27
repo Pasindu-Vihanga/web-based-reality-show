@@ -1,8 +1,9 @@
 package com.example.demo.Service;
 
+import com.example.demo.Config.VoteID;
 import com.example.demo.DAO.VoteDAO;
-import com.example.demo.Entity.Vote;
 import com.example.demo.Entity.Show;
+import com.example.demo.Entity.Vote;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +14,15 @@ import java.util.Optional;
 public class VoteService {
 
     private final VoteDAO voteDAO;
-    private final ShowService showService; // ✅ keep ShowService
+    private final ShowService showService;
 
-    public VoteService(VoteDAO voteDAO, @Lazy ShowService showService) { // ✅ lazy injection
+    public VoteService(VoteDAO voteDAO, @Lazy ShowService showService) {
         this.voteDAO = voteDAO;
         this.showService = showService;
+
+        // ✅ Initialize VoteID counter with last session number from DB
+        int lastNum = voteDAO.getLastSessionNumber();
+        VoteID.initialize(lastNum);
     }
 
     public List<Vote> getAllSessions() {
@@ -37,11 +42,23 @@ public class VoteService {
     }
 
     public void saveSession(Vote session) {
-        // ✅ ensure episode is valid
+        // ✅ Generate ID if missing
+        if (session.getSessionId() == null || session.getSessionId().isBlank()) {
+            session.setSessionId(VoteID.generateSessionId());
+        }
+
+        // ✅ Default status
+        if (session.getStatus() == null || session.getStatus().isBlank()) {
+            session.setStatus("Upcoming");
+        }
+
+        // ✅ Validate and save
         Optional<Show> showOpt = showService.findShowById(session.getShow().getEpisodeId());
         if (showOpt.isPresent() && validateSession(session)) {
             session.setShow(showOpt.get());
             voteDAO.save(session);
+        } else {
+            throw new IllegalArgumentException("Invalid session data");
         }
     }
 
@@ -49,6 +66,12 @@ public class VoteService {
         Optional<Show> showOpt = showService.findShowById(session.getShow().getEpisodeId());
         if (showOpt.isPresent() && validateSession(session)) {
             session.setShow(showOpt.get());
+
+            // Ensure status is not blank during update
+            if (session.getStatus() == null || session.getStatus().isBlank()) {
+                session.setStatus("Upcoming");
+            }
+
             return voteDAO.update(session);
         }
         return 0;

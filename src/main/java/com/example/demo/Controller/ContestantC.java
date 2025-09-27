@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,81 +38,6 @@ public class ContestantC {
         this.resultService = resultService;
     }
 
-    /* ================== ADMIN: VIEW ALL ================== */
-    @GetMapping("/contestantView")
-    public String viewAllContestants(Model model, HttpSession session) {
-        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) return "redirect:/loginA";
-
-        model.addAttribute("contestantList", contestantService.getAllContestants());
-        model.addAttribute("episodeList", showService.getAllShows());
-        model.addAttribute("contestant", new Contestant());
-        return "contestantView";
-    }
-
-    @PostMapping("/contestant/add")
-    public String addContestant(@ModelAttribute Contestant contestant,
-                                @RequestParam("imageFile") MultipartFile imageFile,
-                                HttpSession session) throws Exception {
-        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) return "redirect:/loginA";
-
-        if (contestant.getContestantId() == null || contestant.getContestantId().isBlank()) {
-            contestant.setContestantId(UUID.randomUUID().toString());
-        }
-
-        if (!imageFile.isEmpty()) {
-            contestant.setImage(imageFile.getBytes());
-        }
-
-        contestantService.saveContestant(contestant);
-        return "redirect:/contestantView";
-    }
-
-    @PostMapping("/contestant/update")
-    public String updateContestant(@ModelAttribute Contestant contestant,
-                                   @RequestParam("imageFile") MultipartFile imageFile,
-                                   HttpSession session) throws Exception {
-        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) return "redirect:/loginA";
-
-        if (!imageFile.isEmpty()) {
-            contestant.setImage(imageFile.getBytes());
-        } else {
-            // Keep old image if no new one uploaded
-            contestantService.findContestantById(contestant.getContestantId())
-                    .ifPresent(c -> contestant.setImage(c.getImage()));
-        }
-
-        contestantService.updateContestant(contestant);
-        return "redirect:/contestantView";
-    }
-
-
-    @GetMapping("/contestant/edit/{id}")
-    public String editContestant(@PathVariable("id") String contestantId, Model model, HttpSession session) {
-        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) return "redirect:/loginA";
-
-        Optional<Contestant> contestant = contestantService.findContestantById(contestantId);
-        if (contestant.isPresent()) {
-            model.addAttribute("contestant", contestant.get());
-            model.addAttribute("episodeList", showService.getAllShows());
-            return "editContestant";
-        }
-        return "redirect:/contestantView";
-    }
-
-
-    @PostMapping("/contestant/delete/{id}")
-    public String deleteContestant(@PathVariable("id") String contestantId, HttpSession session) {
-        Admin loggedInAdmin = (Admin) session.getAttribute("loggedInAdmin");
-        if (loggedInAdmin == null) return "redirect:/loginA";
-
-        contestantService.deleteContestant(contestantId);
-        return "redirect:/contestantView";
-    }
-
     /* ================== USER: VIEW CONTESTANTS BY EPISODE ================== */
     @GetMapping("/contestantForUser/{episodeId}")
     public String viewContestantsForUser(@PathVariable("episodeId") String episodeId,
@@ -125,8 +49,19 @@ public class ContestantC {
         List<Contestant> contestants = contestantService.findByEpisodeId(episodeId);
         model.addAttribute("contestantList", contestants);
         model.addAttribute("episodeId", episodeId);
-        return "contestantForUser";
 
+        // ✅ find active session for this episode
+        List<Vote> activeSessions = voteService.getActiveSessions();
+        Vote sessionForEpisode = activeSessions.stream()
+                .filter(s -> s.getShow().getEpisodeId().equals(episodeId))
+                .findFirst()
+                .orElse(null);
+
+        if (sessionForEpisode != null) {
+            model.addAttribute("currentSessionId", sessionForEpisode.getSessionId());
+        }
+
+        return "contestantForUser";
     }
 
     /* ================== USER: VOTE FOR CONTESTANT ================== */
@@ -150,7 +85,7 @@ public class ContestantC {
             return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
         }
 
-        // Find active session for this episode
+        // ✅ find active session for this episode
         List<Vote> activeSessions = voteService.getActiveSessions();
         Vote sessionForEpisode = activeSessions.stream()
                 .filter(s -> s.getShow().getEpisodeId().equals(contestant.getShow().getEpisodeId()))
@@ -162,15 +97,22 @@ public class ContestantC {
             return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
         }
 
+        // ✅ check if user already voted in this session
+        String votedKey = "voted-" + sessionForEpisode.getSessionId();
+        if (session.getAttribute(votedKey) != null) {
+            model.addAttribute("error", "You have already voted in this session.");
+            return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
+        }
+
         // ✅ Cast vote
         resultService.castVote(sessionForEpisode.getSessionId(), contestant);
 
-        // ✅ Mark this user as voted (per session)
-        session.setAttribute("voted-" + sessionForEpisode.getSessionId(), true);
+        // ✅ Mark as voted for this session
+        session.setAttribute(votedKey, true);
 
+        model.addAttribute("message", "Your vote has been recorded!");
         return "redirect:/contestantForUser/" + contestant.getShow().getEpisodeId();
     }
-
 
     /* ================== SERVE CONTESTANT IMAGE ================== */
     @GetMapping("/images/{contestantId}")
@@ -184,4 +126,26 @@ public class ContestantC {
         }
         return ResponseEntity.notFound().build();
     }
+
+    /* ================== PUBLIC: VIEW SUMMARY OF CONTESTANTS ================== */
+    @GetMapping("/contestantSummary")
+    public String viewContestantSummary(Model model) {
+        List<Contestant> contestants = contestantService.getAllContestants();
+        model.addAttribute("contestantList", contestants);
+
+        // ✅ Extract Winner & Runner-up if available
+        Contestant winner = contestants.stream()
+                .filter(c -> "winner".equalsIgnoreCase(c.getStatus()))
+                .findFirst().orElse(null);
+
+        Contestant runnerUp = contestants.stream()
+                .filter(c -> "runnerup".equalsIgnoreCase(c.getStatus()))
+                .findFirst().orElse(null);
+
+        model.addAttribute("winner", winner);
+        model.addAttribute("runnerUp", runnerUp);
+
+        return "contestantSum";
+    }
+
 }

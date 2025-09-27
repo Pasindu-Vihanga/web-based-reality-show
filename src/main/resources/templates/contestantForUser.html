@@ -40,7 +40,7 @@
                           th:text="${c.status}"></span>
 
                     <!-- ✅ Voting UI -->
-                    <div class="mt-3">
+                    <div class="mt-3" th:if="${currentSessionId != null}">
                         <!-- Show Vote button only if not voted yet -->
                         <form th:if="${session['voted-' + currentSessionId] == null}"
                               th:action="@{/vote/{id}(id=${c.contestantId})}"

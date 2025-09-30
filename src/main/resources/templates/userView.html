@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management - Reality Show</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 1rem; }
+        .user-photo { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold" href="/admin/dashboard">Reality Show Admin</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/admin/manage">Manage Admins</a></li>
+                <li class="nav-item"><a class="nav-link" href="/episodeView">Manage Shows</a></li>
+                <li class="nav-item"><a class="nav-link" href="/voteSessionA">Manage Voting</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/userView">Manage Users</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="/admin/logout">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Container -->
+<div class="container">
+    <h2 class="mb-4 text-center text-indigo-600">User Management</h2>
+
+    <!-- Search Form -->
+    <form class="d-flex mb-3" th:action="@{/userSearch}" method="get">
+        <input class="form-control me-2" type="search" placeholder="Search by name, email, or phone"
+               name="keyword" th:value="${searchKeyword}">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+
+    <!-- Users Table -->
+    <div class="card shadow mb-5">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Registered Users</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Photo</th>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${userList}">
+                    <td>
+                        <img th:src="@{/user/photo/{id}(id=${u.userId})}" class="user-photo" alt="User Photo">
+                    </td>
+                    <td th:text="${u.userId}">USR000001</td>
+                    <td th:text="${u.username}">Username</td>
+                    <td th:text="${u.email}">user@mail.com</td>
+                    <td th:text="${u.phoneNumber}">1234567890</td>
+                    <td th:text="${u.address}">City, Country</td>
+                    <td>
+                        <form th:action="@{/userDelete/{id}(id=${u.userId})}" method="post" style="display:inline;">
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this user?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(userList)}">
+                    <td colspan="7" class="text-center text-muted">No users found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/a2e0adfb58.js" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -104,7 +104,7 @@
                     <img th:if="${winner.image != null}"
                          th:src="@{'/images/' + ${winner.contestantId}}"
                          class="img-fluid rounded mb-2" style="max-height:200px; object-fit:cover;">
-                    <h5 th:text="${winner.firstName + ' ' + winner.lastName}"></h5>
+                    <h5 th:text="${winner.name + ' ' + winner.lastName}"></h5>
                     <p>Age: <span th:text="${winner.age}"></span></p>
                     <p>DOB: <span th:text="${winner.dob}"></span></p>
                     <p>Contact: <span th:text="${winner.contactNumber}"></span></p>
@@ -120,7 +120,7 @@
                     <img th:if="${runnerUp.image != null}"
                          th:src="@{'/images/' + ${runnerUp.contestantId}}"
                          class="img-fluid rounded mb-2" style="max-height:200px; object-fit:cover;">
-                    <h5 th:text="${runnerUp.firstName + ' ' + runnerUp.lastName}"></h5>
+                    <h5 th:text="${runnerUp.name + ' ' + runnerUp.lastName}"></h5>
                     <p>Age: <span th:text="${runnerUp.age}"></span></p>
                     <p>DOB: <span th:text="${runnerUp.dob}"></span></p>
                     <p>Contact: <span th:text="${runnerUp.contactNumber}"></span></p>
@@ -145,7 +145,7 @@
                      style="height:180px; object-fit:cover;">
 
                 <div class="card-body">
-                    <h5 class="card-title" th:text="${c.firstName + ' ' + c.lastName}"></h5>
+                    <h5 class="card-title" th:text="${c.name + ' ' + c.lastName}"></h5>
                     <p>Age: <span th:text="${c.age}"></span></p>
                     <p>DOB: <span th:text="${c.dob}"></span></p>
                     <p>Contact: <span th:text="${c.contactNumber}"></span></p>

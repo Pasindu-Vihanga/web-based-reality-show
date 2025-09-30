@@ -16,7 +16,7 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="/contestantView">All Contestants</a></li>
                 <li class="nav-item"><a class="nav-link" href="/contestantSummary">Summary</a></li>
-                <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logoutU">Logout</a></li>
             </ul>
         </div>
     </div>
@@ -42,13 +42,13 @@
                      class="card-img-top rounded-t-2xl" alt="Contestant Image">
                 <div class="card-body text-center">
                     <h5 class="card-title text-indigo-700 font-semibold"
-                        th:text="${c.firstName + ' ' + c.lastName}">Contestant Name</h5>
+                        th:text="${c.name + ' ' + c.lastName}">Contestant Name</h5>
                     <p class="text-gray-600">Age: <span th:text="${c.age}"></span></p>
                     <p class="text-gray-600">DOB: <span th:text="${c.dob}"></span></p>
                     <p class="text-gray-600">Contact: <span th:text="${c.contactNumber}"></span></p>
                     <p class="card-text text-gray-600" th:text="${c.bio}">Contestant Bio</p>
 
-                    <!-- ✅ Status Badge with th:switch -->
+                    <!-- Status Badge -->
                     <div th:switch="${c.status}">
                         <span th:case="'active'" class="badge bg-success" th:text="${c.status}"></span>
                         <span th:case="'eliminated'" class="badge bg-danger" th:text="${c.status}"></span>
@@ -84,7 +84,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label>First Name</label>
-                        <input type="text" class="form-control" name="firstName" required>
+                        <input type="text" class="form-control" name="name" required>
                     </div>
                     <div class="mb-3">
                         <label>Last Name</label>
@@ -146,12 +146,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- ✅ Hidden ID so update works -->
                     <input type="hidden" name="contestantId" th:value="${c.contestantId}">
 
                     <div class="mb-3">
                         <label>First Name</label>
-                        <input type="text" class="form-control" name="firstName" th:value="${c.firstName}" required>
+                        <input type="text" class="form-control" name="name" th:value="${c.name}" required>
                     </div>
                     <div class="mb-3">
                         <label>Last Name</label>

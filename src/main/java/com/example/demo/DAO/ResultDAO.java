@@ -32,7 +32,7 @@ public class ResultDAO {
         // Build Contestant
         Contestant contestant = new Contestant();
         contestant.setContestantId(rs.getString("contestant_id"));
-        contestant.setFirstName(rs.getString("contestant_name"));
+        contestant.setName(rs.getString("contestant_name"));
 
         // Build Result
         return new Result(

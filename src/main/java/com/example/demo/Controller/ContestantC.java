@@ -39,9 +39,13 @@ public class ContestantC {
         this.resultService = resultService;
     }
 
-    /* ================== ADMIN/USER: VIEW ALL CONTESTANTS ================== */
+    /* ================== ADMIN: VIEW ALL CONTESTANTS ================== */
     @GetMapping("/contestantView")
-    public String viewAllContestants(Model model) {
+    public String viewAllContestants(HttpSession session, Model model) {
+        if (session.getAttribute("loggedInAdmin") == null) {
+            return "redirect:/loginA"; // force admin login
+        }
+
         List<Contestant> contestants = contestantService.getAllContestants();
         model.addAttribute("contestantList", contestants);
         model.addAttribute("contestant", new Contestant()); // for Add modal
@@ -49,17 +53,20 @@ public class ContestantC {
         return "contestantView";
     }
 
-    /* ================== SAFE: GET /contestant/add → redirect ================== */
     @GetMapping("/contestant/add")
     public String redirectAddGet() {
         return "redirect:/contestantView";
     }
 
-    /* ================== ADMIN: ADD CONTESTANT ================== */
     @PostMapping("/contestant/add")
     public String addContestant(@ModelAttribute Contestant contestant,
                                 @RequestParam("imageFile") MultipartFile imageFile,
-                                RedirectAttributes redirectAttributes) {
+                                RedirectAttributes redirectAttributes,
+                                HttpSession session) {
+        if (session.getAttribute("loggedInAdmin") == null) {
+            return "redirect:/loginA";
+        }
+
         try {
             contestant.setContestantId(UUID.randomUUID().toString());
 
@@ -75,12 +82,15 @@ public class ContestantC {
         return "redirect:/contestantView";
     }
 
-
-    /* ================== ADMIN: UPDATE CONTESTANT ================== */
     @PostMapping("/contestant/update")
     public String updateContestant(@ModelAttribute Contestant contestant,
                                    @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                                   RedirectAttributes redirectAttributes) {
+                                   RedirectAttributes redirectAttributes,
+                                   HttpSession session) {
+        if (session.getAttribute("loggedInAdmin") == null) {
+            return "redirect:/loginA";
+        }
+
         try {
             if (imageFile != null && !imageFile.isEmpty()) {
                 contestant.setImage(imageFile.getBytes());
@@ -98,10 +108,14 @@ public class ContestantC {
         return "redirect:/contestantView";
     }
 
-    /* ================== ADMIN: DELETE CONTESTANT ================== */
     @PostMapping("/contestant/delete/{id}")
     public String deleteContestant(@PathVariable("id") String contestantId,
-                                   RedirectAttributes redirectAttributes) {
+                                   RedirectAttributes redirectAttributes,
+                                   HttpSession session) {
+        if (session.getAttribute("loggedInAdmin") == null) {
+            return "redirect:/loginA";
+        }
+
         try {
             contestantService.deleteContestant(contestantId);
             redirectAttributes.addFlashAttribute("message", "🗑 Contestant deleted successfully!");
@@ -111,7 +125,7 @@ public class ContestantC {
         return "redirect:/contestantView";
     }
 
-    /* ================== USER: VIEW CONTESTANTS BY EPISODE ================== */
+    /* ================== USER ================== */
     @GetMapping("/contestantForUser/{episodeId}")
     public String viewContestantsForUser(@PathVariable("episodeId") String episodeId,
                                          Model model,
@@ -136,7 +150,6 @@ public class ContestantC {
         return "contestantForUser";
     }
 
-    /* ================== USER: VOTE FOR CONTESTANT ================== */
     @PostMapping("/vote/{contestantId}")
     public String voteForContestant(@PathVariable("contestantId") String contestantId,
                                     HttpSession session,
@@ -180,7 +193,7 @@ public class ContestantC {
         return "redirect:/feedbackU";
     }
 
-    /* ================== SERVE CONTESTANT IMAGE ================== */
+    /* ================== IMAGE ================== */
     @GetMapping("/images/{contestantId}")
     public ResponseEntity<byte[]> getContestantImage(@PathVariable("contestantId") String contestantId) {
         Optional<Contestant> contestantOpt = contestantService.findContestantById(contestantId);
@@ -193,7 +206,7 @@ public class ContestantC {
         return ResponseEntity.notFound().build();
     }
 
-    /* ================== PUBLIC: VIEW SUMMARY OF CONTESTANTS ================== */
+    /* ================== SUMMARY ================== */
     @GetMapping("/contestantSummary")
     public String viewContestantSummary(Model model) {
         List<Contestant> contestants = contestantService.getAllContestants();
@@ -211,5 +224,12 @@ public class ContestantC {
         model.addAttribute("runnerUp", runnerUp);
 
         return "contestantSum";
+    }
+
+    /* ================== USER LOGOUT ================== */
+    @GetMapping("/logoutU")
+    public String userLogout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/loginU";
     }
 }

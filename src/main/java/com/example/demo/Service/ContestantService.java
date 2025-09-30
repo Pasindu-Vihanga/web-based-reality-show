@@ -55,14 +55,12 @@ public class ContestantService {
         return contestantDAO.delete(contestantId);
     }
 
-    /** ✅ Validation updated for new fields */
     public boolean validateContestant(Contestant contestant) {
         return contestant != null &&
-                contestant.getFirstName() != null && !contestant.getFirstName().isBlank() &&
+                contestant.getName() != null && !contestant.getName().isBlank() &&
                 contestant.getLastName() != null && !contestant.getLastName().isBlank() &&
                 contestant.getAge() > 0 &&
                 contestant.getDob() != null &&
-                contestant.getContactNumber() != null && !contestant.getContactNumber().isBlank() &&
                 contestant.getStatus() != null && !contestant.getStatus().isBlank() &&
                 contestant.getShow() != null &&
                 contestant.getShow().getEpisodeId() != null &&

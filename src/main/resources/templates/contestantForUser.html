@@ -113,8 +113,12 @@
                      style="height:220px; object-fit:cover;">
 
                 <div class="card-body text-center">
-                    <h5 th:text="${c.name}" class="card-title"></h5>
+                    <h5 class="card-title" th:text="${c.firstName + ' ' + c.lastName}"></h5>
+                    <p>Age: <span th:text="${c.age}"></span></p>
+                    <p>DOB: <span th:text="${c.dob}"></span></p>
+                    <p>Contact: <span th:text="${c.contactNumber}"></span></p>
                     <p th:text="${c.bio}" class="card-text text-light"></p>
+
                     <span class="badge"
                           th:classappend="${c.status == 'active'} ? 'bg-success' : 'bg-secondary'"
                           th:text="${c.status}"></span>

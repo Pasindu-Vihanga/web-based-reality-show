@@ -61,7 +61,6 @@ public class ContestantC {
                                 @RequestParam("imageFile") MultipartFile imageFile,
                                 RedirectAttributes redirectAttributes) {
         try {
-            // ✅ Generate UUID for new contestant
             contestant.setContestantId(UUID.randomUUID().toString());
 
             if (imageFile != null && !imageFile.isEmpty()) {
@@ -71,10 +70,11 @@ public class ContestantC {
             contestantService.saveContestant(contestant);
             redirectAttributes.addFlashAttribute("message", "✅ Contestant added successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Failed to add contestant.");
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to add contestant: " + e.getMessage());
         }
         return "redirect:/contestantView";
     }
+
 
     /* ================== ADMIN: UPDATE CONTESTANT ================== */
     @PostMapping("/contestant/update")
@@ -85,12 +85,12 @@ public class ContestantC {
             if (imageFile != null && !imageFile.isEmpty()) {
                 contestant.setImage(imageFile.getBytes());
             } else {
-                // Keep old image if not uploaded
                 contestant.setImage(contestantService.findContestantById(contestant.getContestantId())
                         .map(Contestant::getImage)
                         .orElse(null));
             }
-            contestantService.saveContestant(contestant);
+
+            contestantService.updateContestant(contestant);
             redirectAttributes.addFlashAttribute("message", "✏️ Contestant updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "❌ Failed to update contestant.");
@@ -123,7 +123,6 @@ public class ContestantC {
         model.addAttribute("contestantList", contestants);
         model.addAttribute("episodeId", episodeId);
 
-        // Find active voting session for this episode
         List<Vote> activeSessions = voteService.getActiveSessions();
         Vote sessionForEpisode = activeSessions.stream()
                 .filter(s -> s.getShow().getEpisodeId().equals(episodeId))
@@ -157,7 +156,6 @@ public class ContestantC {
             return "redirect:/feedbackU";
         }
 
-        // Find active session for this contestant’s episode
         List<Vote> activeSessions = voteService.getActiveSessions();
         Vote sessionForEpisode = activeSessions.stream()
                 .filter(s -> s.getShow().getEpisodeId().equals(contestant.getShow().getEpisodeId()))
@@ -169,7 +167,6 @@ public class ContestantC {
             return "redirect:/feedbackU";
         }
 
-        // Prevent multiple votes
         String votedKey = "voted-" + sessionForEpisode.getSessionId();
         if (session.getAttribute(votedKey) != null) {
             redirectAttributes.addFlashAttribute("message", "You have already voted in this session.");

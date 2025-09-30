@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +35,13 @@ public class ContestantDAO {
 
         Contestant c = new Contestant();
         c.setContestantId(rs.getString("contestant_id"));
-        c.setName(rs.getString("name"));
+        c.setFirstName(rs.getString("first_name"));
+        c.setLastName(rs.getString("last_name"));
+        c.setAge(rs.getInt("age"));
+        if (rs.getDate("dob") != null) {
+            c.setDob(rs.getDate("dob").toLocalDate());
+        }
+        c.setContactNumber(rs.getString("contact_number"));
         c.setBio(rs.getString("bio"));
         c.setImage(rs.getBytes("image"));
         c.setStatus(rs.getString("status"));
@@ -43,14 +50,20 @@ public class ContestantDAO {
         return c;
     };
 
+    /* ========== SAVE NEW CONTESTANT ========== */
     public void save(Contestant contestant) {
         String sql = """
-            INSERT INTO contestant (contestant_id, name, bio, image, status, episode_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO contestant 
+            (contestant_id, first_name, last_name, age, dob, contact_number, bio, image, status, episode_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
         jdbcTemplate.update(sql,
                 contestant.getContestantId(),
-                contestant.getName(),
+                contestant.getFirstName(),
+                contestant.getLastName(),
+                contestant.getAge(),
+                contestant.getDob() != null ? Date.valueOf(contestant.getDob()) : null,
+                contestant.getContactNumber(),
                 contestant.getBio(),
                 contestant.getImage(),
                 contestant.getStatus(),
@@ -58,14 +71,19 @@ public class ContestantDAO {
         );
     }
 
+    /* ========== UPDATE EXISTING CONTESTANT ========== */
     public int update(Contestant contestant) {
         String sql = """
             UPDATE contestant
-            SET name=?, bio=?, image=?, status=?, episode_id=?
+            SET first_name=?, last_name=?, age=?, dob=?, contact_number=?, bio=?, image=?, status=?, episode_id=?
             WHERE contestant_id=?
         """;
         return jdbcTemplate.update(sql,
-                contestant.getName(),
+                contestant.getFirstName(),
+                contestant.getLastName(),
+                contestant.getAge(),
+                contestant.getDob() != null ? Date.valueOf(contestant.getDob()) : null,
+                contestant.getContactNumber(),
                 contestant.getBio(),
                 contestant.getImage(),
                 contestant.getStatus(),
@@ -74,11 +92,13 @@ public class ContestantDAO {
         );
     }
 
+    /* ========== DELETE CONTESTANT ========== */
     public int delete(String contestantId) {
         String sql = "DELETE FROM contestant WHERE contestant_id=?";
         return jdbcTemplate.update(sql, contestantId);
     }
 
+    /* ========== FIND ALL ========== */
     public List<Contestant> findAll() {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status
@@ -88,6 +108,7 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper);
     }
 
+    /* ========== FIND BY EPISODE ID ========== */
     public List<Contestant> findByEpisodeId(String episodeId) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status
@@ -98,6 +119,7 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper, episodeId);
     }
 
+    /* ========== FIND BY STATUS ========== */
     public List<Contestant> findByStatus(String status) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status
@@ -108,6 +130,7 @@ public class ContestantDAO {
         return jdbcTemplate.query(sql, contestantRowMapper, status);
     }
 
+    /* ========== FIND BY ID ========== */
     public Optional<Contestant> findById(String contestantId) {
         String sql = """
             SELECT c.*, s.show_title, s.show_description, s.show_type, s.show_date, s.show_time, s.status

@@ -41,7 +41,11 @@
                 <img th:if="${c.image != null}" th:src="@{/images/{id}(id=${c.contestantId})}"
                      class="card-img-top rounded-t-2xl" alt="Contestant Image">
                 <div class="card-body text-center">
-                    <h5 class="card-title text-indigo-700 font-semibold" th:text="${c.name}">Contestant Name</h5>
+                    <h5 class="card-title text-indigo-700 font-semibold"
+                        th:text="${c.firstName + ' ' + c.lastName}">Contestant Name</h5>
+                    <p class="text-gray-600">Age: <span th:text="${c.age}"></span></p>
+                    <p class="text-gray-600">DOB: <span th:text="${c.dob}"></span></p>
+                    <p class="text-gray-600">Contact: <span th:text="${c.contactNumber}"></span></p>
                     <p class="card-text text-gray-600" th:text="${c.bio}">Contestant Bio</p>
 
                     <!-- ✅ Status Badge with th:switch -->
@@ -79,8 +83,24 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label>Name</label>
-                        <input type="text" class="form-control" name="name" required>
+                        <label>First Name</label>
+                        <input type="text" class="form-control" name="firstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" name="lastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Age</label>
+                        <input type="number" class="form-control" name="age" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Date of Birth</label>
+                        <input type="date" class="form-control" name="dob" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Contact Number</label>
+                        <input type="text" class="form-control" name="contactNumber" required>
                     </div>
                     <div class="mb-3">
                         <label>Bio</label>
@@ -130,8 +150,24 @@
                     <input type="hidden" name="contestantId" th:value="${c.contestantId}">
 
                     <div class="mb-3">
-                        <label>Name</label>
-                        <input type="text" class="form-control" name="name" th:value="${c.name}" required>
+                        <label>First Name</label>
+                        <input type="text" class="form-control" name="firstName" th:value="${c.firstName}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" name="lastName" th:value="${c.lastName}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Age</label>
+                        <input type="number" class="form-control" name="age" th:value="${c.age}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Date of Birth</label>
+                        <input type="date" class="form-control" name="dob" th:value="${c.dob}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Contact Number</label>
+                        <input type="text" class="form-control" name="contactNumber" th:value="${c.contactNumber}" required>
                     </div>
                     <div class="mb-3">
                         <label>Bio</label>

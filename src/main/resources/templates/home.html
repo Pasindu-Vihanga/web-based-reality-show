@@ -465,7 +465,7 @@
     // Vote button functionality
     document.querySelectorAll('.vote-btn').forEach(button => {
         button.addEventListener('click', function() {
-            alert('You need to login first to vote for this contestant!');
+            window.location.href = '/loginU';
         });
     });
 </script>
